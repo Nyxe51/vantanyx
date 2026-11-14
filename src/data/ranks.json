@@ -1,0 +1,12 @@
+{
+  "xpFormula": "XP cumulée pour atteindre le niveau N = 100 × N + 5 × N²",
+  "ranks": [
+    { "id": "fonte",   "name": "Fonte",   "minLevel": 1,   "hue": 25,  "eta": "départ" },
+    { "id": "fer",     "name": "Fer",     "minLevel": 20,  "hue": 355, "eta": "≈ 1,5 mois" },
+    { "id": "acier",   "name": "Acier",   "minLevel": 40,  "hue": 215, "eta": "≈ 5 mois" },
+    { "id": "titane",  "name": "Titane",  "minLevel": 60,  "hue": 265, "eta": "≈ 10 mois" },
+    { "id": "chrome",  "name": "Chrome",  "minLevel": 75,  "hue": 170, "eta": "≈ 14-15 mois" },
+    { "id": "platine", "name": "Platine", "minLevel": 88,  "hue": 320, "eta": "≈ 19-20 mois" },
+    { "id": "diamant", "name": "Diamant", "minLevel": 100, "hue": 195, "eta": "≈ 2 ans" }
+  ]
+}

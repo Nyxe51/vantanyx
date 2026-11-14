@@ -1,0 +1,83 @@
+/* Polices auto-hébergées (fonctionnent hors ligne, aucune requête vers Google) */
+@import '@fontsource/unbounded/latin-400.css';
+@import '@fontsource/unbounded/latin-600.css';
+@import '@fontsource/manrope/latin-400.css';
+@import '@fontsource/manrope/latin-600.css';
+@import '@fontsource/manrope/latin-700.css';
+
+:root {
+  color-scheme: dark;
+  /* Couleur d'accent : sera pilotée par le rang et le % du jour (voir theme.js plus tard) */
+  --h: 25;
+  --s: 0%;
+  --ac: hsl(var(--h) var(--s) 62%);
+  --acd: hsl(var(--h) var(--s) 14%);
+  --tx: #eef2f6;
+  --mu: #a3acb7;
+  --gl: rgba(255, 255, 255, 0.06);
+  --bd: rgba(200, 225, 255, 0.16);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  height: 100%;
+  background: #000;
+  color: var(--tx);
+  font: 14px/1.45 Manrope, system-ui, sans-serif;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  background: radial-gradient(circle at 50% 0, var(--acd), #000 60%);
+}
+
+#app {
+  position: relative;
+  width: 100%;
+  max-width: 430px;
+  height: 100%;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 12% 28%, rgba(140, 180, 255, 0.16), transparent 38%),
+    radial-gradient(circle at 95% 62%, rgba(255, 255, 255, 0.1), transparent 34%),
+    radial-gradient(circle at 20% 92%, hsl(var(--h) var(--s) 30% / 0.35), transparent 40%),
+    #030405;
+}
+
+h1,
+h2,
+h3,
+.u {
+  font-family: Unbounded, system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* Texte « chrome » */
+.chr {
+  background: linear-gradient(180deg, #fff 0%, #aeb8c4 48%, #f4f8fc 56%, #7c8794 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.mu {
+  color: var(--mu);
+  font-size: 12px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 0.01ms !important;
+    animation: none !important;
+  }
+}
