@@ -1,6 +1,6 @@
 # Vantanyx – Stay Focus
 
-Appli web installable (PWA) pour rester focus sur ses objectifs. Publiée sur GitHub Pages : `https://<ton-pseudo>.github.io/vantanyx/`
+Appli web installable (PWA) pour rester focus sur ses objectifs. Publiée sur GitHub Pages : `https://nyxe51.github.io/vantanyx/`
 
 ## Tester sur ton PC (nécessite Node 22 LTS)
 
