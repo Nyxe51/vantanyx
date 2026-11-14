@@ -1,0 +1,9 @@
+[
+  { "id": "maitrise", "name": "Maîtrise",             "sub": "Validée au réveil",       "group": "Les interdits", "type": "check" },
+  { "id": "sommeil",  "name": "8 h de sommeil",       "sub": "Validé au réveil",        "group": "Le rythme",     "type": "check" },
+  { "id": "eau",      "name": "2 L d’eau",            "group": "Le rythme",              "type": "gauge", "goal": 200 },
+  { "id": "skincare", "name": "Skincare",             "group": "Les soins",              "type": "pair",  "labels": ["Matin", "Soir"] },
+  { "id": "douche",   "name": "Douche le soir",       "sub": "À la fin de la journée",  "group": "Les soins",     "type": "check" },
+  { "id": "pompes",   "name": "20 pompes minimum",    "sub": "Note ton vrai chiffre",   "group": "Le corps",      "type": "check" },
+  { "id": "planche",  "name": "1 minute de planche",  "sub": "Note ton vrai chiffre",   "group": "Le corps",      "type": "check" }
+]

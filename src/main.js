@@ -1,35 +1,106 @@
 import './styles/base.css';
 import './styles/glass.css';
-import logoUrl from './assets/logo.webp';
-import ranks from './data/ranks.json';
-import quotes from './data/quotes.json';
+import './styles/components.css';
+import './styles/shell.css';
+import './styles/home.css';
 
-// Page provisoire : sert uniquement à vérifier la chaîne de publication + l'installation PWA.
+import { getState, subscribe, actions, transient } from './store.js';
+import { parse, onChange, goTab, openSub, closeSub } from './router.js';
+import { derive } from './logic/derive.js';
+import { applyTheme } from './logic/theme.js';
+import { initHold } from './logic/hold.js';
+import { fileToDataUrl } from './logic/images.js';
+import { mountShell, renderNav, setDrawer, setSub } from './ui/shell.js';
+import { renderHome } from './screens/home.js';
+import { renderSoon, renderSubScreen } from './screens/soon.js';
+import ranksData from './data/ranks.json';
+
 const app = document.getElementById('app');
+mountShell(app);
+const main = document.getElementById('m');
 
-const installee = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
-const quote = quotes[new Date().getDate() % quotes.length];
+// État d'affichage (non sauvegardé).
+const view = { quoteOffset: 0, pop: '' };
+let shownBg = null;
+let shownDay = null;
 
-app.innerHTML = `
-  <main style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:24px;text-align:center">
-    <img src="${logoUrl}" alt="" width="280" style="width:280px;max-width:80%;height:auto;filter:drop-shadow(0 0 28px rgba(190,215,255,.35))">
-    <h1 class="chr" style="font-size:30px">Vantanyx</h1>
-    <p class="mu" style="max-width:260px">${quote}</p>
-    <div class="glass" style="padding:14px 18px;border-radius:18px;margin-top:8px">
-      <div class="mu" id="etat-install"></div>
-      <div class="mu" id="etat-reseau"></div>
-      <div class="mu">${ranks.ranks.length} rangs chargés · v0.1 (squelette)</div>
-    </div>
-  </main>
-`;
+function render() {
+  const state = getState();
+  const route = parse();
+  const d = derive(state, ranksData.ranks);
 
-document.getElementById('etat-install').textContent = installee
-  ? 'Mode : appli installée ✓'
-  : 'Mode : navigateur (pas encore installée)';
+  applyTheme(document.documentElement, d.pct, d.hue);
 
-function majReseau() {
-  document.getElementById('etat-reseau').textContent = navigator.onLine ? 'Réseau : en ligne' : 'Réseau : hors ligne';
+  // Fond d'accueil : une variable CSS, posée seulement quand l'image change.
+  if (state.ui.bg !== shownBg) {
+    shownBg = state.ui.bg;
+    app.style.setProperty('--hero-bg', shownBg ? `url("${shownBg}")` : 'none');
+  }
+
+  view.pop = transient.pop;
+  transient.pop = '';
+  main.innerHTML = route.tab === 'accueil' ? renderHome(state, d, view) : renderSoon(route.tab);
+
+  renderNav(route.tab);
+  setSub(route.sub ? renderSubScreen(route.sub) : null);
+  shownDay = d.today;
 }
-addEventListener('online', majReseau);
-addEventListener('offline', majReseau);
-majReseau();
+
+// --- Clics : tout passe par data-act="..." ---
+document.addEventListener('click', (e) => {
+  const el = e.target.closest('[data-act]');
+  if (!el) return;
+  const { act, arg, rule } = el.dataset;
+  switch (act) {
+    case 'tab':
+      goTab(arg);
+      main.scrollTop = 0;
+      break;
+    case 'drawer':
+      setDrawer(arg === '1');
+      break;
+    case 'sub':
+      setDrawer(false);
+      openSub(arg);
+      break;
+    case 'back':
+      closeSub();
+      break;
+    case 'gauge':
+      actions.adjustGauge(rule, Number(arg));
+      break;
+    case 'quote':
+      view.quoteOffset++;
+      render();
+      break;
+  }
+});
+
+// Changer le fond d'accueil.
+document.addEventListener('change', async (e) => {
+  const input = e.target.closest('[data-bgfile]');
+  if (!input || !input.files[0]) return;
+  try {
+    actions.setBackground(await fileToDataUrl(input.files[0], 1000));
+  } catch (err) {
+    console.warn(err);
+  }
+  input.value = '';
+});
+
+// Appui long sur une règle.
+initHold(main, (id, j, wasDone) => actions.setCheck(id, j, !wasDone));
+
+subscribe(render);
+onChange(render);
+
+// Si on passe minuit pendant que l'appli est ouverte, on repart sur un nouveau jour.
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) render();
+});
+setInterval(() => {
+  const d = derive(getState(), ranksData.ranks);
+  if (d.today !== shownDay) render();
+}, 60000);
+
+render();

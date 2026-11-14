@@ -1,6 +1,6 @@
 # Vantanyx – Stay Focus
 
-Appli web installable (PWA) pour rester focus sur ses objectifs. Publiée sur GitHub Pages : `https://nyxe51.github.io/vantanyx/`
+Appli web installable (PWA) pour rester focus sur ses objectifs. Publiée sur GitHub Pages : `https://<ton-pseudo>.github.io/vantanyx/`
 
 ## Tester sur ton PC (nécessite Node 22 LTS)
 
@@ -21,13 +21,16 @@ Réglage à faire une seule fois : **Settings → Pages → Source : GitHub Acti
 - `index.html` : coquille de la page (icônes iPhone, manifest)
 - `vite.config.js` : config + PWA (adresse `/vantanyx/`, icônes, hors-ligne)
 - `public/` : icônes et favicon (copiés tels quels)
-- `src/main.js` : point de départ (page provisoire pour l'instant)
-- `src/styles/` : `base.css` (variables, polices), `glass.css` (effet verre)
-- `src/data/` : contenus en JSON (`ranks.json`, `quotes.json`)
+- `src/main.js` : point de départ : branche l'état, l'affichage, les clics
+- `src/store.js` : seul fichier qui sait où sont rangées les données (stockage local pour l'instant, Firestore plus tard)
+- `src/router.js` : navigation (`#/accueil`, `#/sport`…)
+- `src/logic/` : calculs purs, sans écran (XP, rangs, % du jour, stats, thème, appui long, photos)
+- `src/screens/` : un fichier par écran (`home.js`, `soon.js` pour ce qui n'est pas encore fait)
+- `src/ui/` : coquille (barre du bas, menu), icônes
+- `src/styles/` : `base.css`, `glass.css`, `components.css`, `shell.css`, `home.css`
+- `src/data/` : contenus en JSON (`ranks.json`, `quotes.json`, `default-rules.json`)
 - `src/assets/` : logo (webp + svg)
 - `.github/workflows/deploy.yml` : publication automatique sur GitHub Pages
-
-Les dossiers `screens/` et `logic/` seront ajoutés avec les premiers écrans.
 
 ## Notes
 

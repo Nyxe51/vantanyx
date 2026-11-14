@@ -1,0 +1,100 @@
+/* Briques réutilisables : boutons, cartes, barres, lignes. */
+button {
+  font-family: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ac);
+  outline-offset: 2px;
+}
+
+.pad {
+  padding: 0 16px;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+.card {
+  padding: 14px;
+  margin-bottom: 10px;
+}
+
+.g2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+h3 {
+  font-size: 13px;
+  letter-spacing: 0;
+  margin: 6px 4px 10px;
+}
+
+.btn {
+  font: 600 12px Manrope, system-ui, sans-serif;
+  padding: 7px 11px;
+  border-radius: 99px;
+  border: 1px solid var(--bd);
+  background: var(--gl);
+  color: var(--tx);
+  cursor: pointer;
+  transition: transform 0.15s, background 0.2s;
+}
+
+.btn:active {
+  transform: scale(0.95);
+}
+
+.btn.ghost {
+  background: none;
+}
+
+.bar {
+  height: 8px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.bar i {
+  display: block;
+  height: 100%;
+  border-radius: 9px;
+  background: linear-gradient(90deg, #9aa4b0, #fff, var(--ac));
+  transition: width 0.4s;
+}
+
+.rk {
+  font: 600 11px Unbounded, system-ui, sans-serif;
+  padding: 3px 10px;
+  border-radius: 99px;
+  border: 1px solid var(--ac);
+  color: var(--ac);
+}
+
+.hint {
+  margin: -2px 4px 4px;
+  color: var(--mu);
+  font-size: 11.5px;
+}
+
+.soon {
+  text-align: center;
+}
+
+/* Variable animée : remplit les règles en douceur (appui long). */
+@property --f {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
