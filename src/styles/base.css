@@ -30,7 +30,7 @@
 html,
 body {
   height: 100%;
-  background: #000;
+  background: #030405;
   color: var(--tx);
   font: 14px/1.45 Manrope, system-ui, sans-serif;
 }
@@ -41,11 +41,13 @@ body {
   background: radial-gradient(circle at 50% 0, var(--acd), #000 60%);
 }
 
+/* Fixé aux 4 bords de l'écran : en appli installée sur iPhone, `height: 100%` laisse une bande vide en bas. */
 #app {
-  position: relative;
+  position: fixed;
+  inset: 0;
+  margin: 0 auto;
   width: 100%;
   max-width: 430px;
-  height: 100%;
   overflow: hidden;
   background:
     radial-gradient(circle at 12% 28%, rgba(140, 180, 255, 0.16), transparent 38%),
