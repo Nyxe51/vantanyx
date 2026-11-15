@@ -92,6 +92,39 @@ h3 {
   text-align: center;
 }
 
+/* Gros bouton principal. */
+.cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 16px;
+  margin: 2px 0 12px;
+  border: 0;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #fff, #c3ccd6);
+  color: #000;
+  font: 700 14px Unbounded, system-ui, sans-serif;
+  cursor: pointer;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.55), 0 0 28px hsl(var(--h) var(--s) 62% / 0.5), 0 10px 26px rgba(0, 0, 0, 0.5);
+  transition: transform 0.15s;
+}
+
+.cta:active {
+  transform: scale(0.97);
+}
+
+.link {
+  cursor: pointer;
+}
+
+.range {
+  width: 100%;
+  accent-color: #fff;
+  margin-bottom: 14px;
+}
+
 /* Variable animée : remplit les règles en douceur (appui long). */
 @property --f {
   syntax: '<number>';

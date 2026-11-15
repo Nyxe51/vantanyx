@@ -1,6 +1,6 @@
 // Routage par « hash » (#/accueil) : GitHub Pages ne gère pas les vraies adresses d'écran.
 export const TABS = ['accueil', 'sport', 'stats'];
-export const SUBS = ['profil', 'glow', 'objectifs', 'rangs', 'poids', 'reglages', 'couleurs'];
+export const SUBS = ['profil', 'glow', 'objectifs', 'rangs', 'poids', 'reglages', 'couleurs', 'fond'];
 
 let lastTab = 'accueil';
 const listeners = new Set();

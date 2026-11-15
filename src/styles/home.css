@@ -3,12 +3,13 @@
 /* --- Fond + phrase du jour, posée sur l'image --- */
 .hero {
   position: relative;
-  height: calc(276px + env(safe-area-inset-top, 0px));
+  overflow: hidden;
+  height: calc(180px + env(safe-area-inset-top, 0px));
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
-  padding: calc(78px + env(safe-area-inset-top, 0px)) 20px 0;
+  padding: calc(72px + env(safe-area-inset-top, 0px)) 20px 0;
   background:
     radial-gradient(ellipse at 78% 18%, rgba(190, 215, 255, 0.28), transparent 46%),
     radial-gradient(ellipse at 20% 40%, hsl(var(--h) var(--s) 22%), #050607 78%);
@@ -18,14 +19,18 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: var(--hero-bg, none) center / cover no-repeat;
+  background: var(--hero-bg, none) var(--bgx, 50%) var(--bgy, 50%) / cover no-repeat;
+  /* Zoom autour du point choisi : l'image recouvre toujours toute la zone. */
+  transform: scale(var(--bgz, 1));
+  transform-origin: var(--bgx, 50%) var(--bgy, 50%);
 }
 
 .hero::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.06) 22%, rgba(0, 0, 0, 0.12) 52%, rgba(3, 4, 5, 0.78) 80%, #030405);
+  /* Très léger en haut (les boutons restent nets), plus sombre vers le bas pour raccorder le profil. */
+  background: linear-gradient(rgba(0, 0, 0, 0.16), rgba(0, 0, 0, 0) 14%, rgba(0, 0, 0, 0.1) 52%, rgba(3, 4, 5, 0.78) 80%, #030405);
 }
 
 .hero > * {
@@ -33,31 +38,13 @@
   z-index: 1;
 }
 
-.chg {
-  position: absolute;
-  top: calc(12px + env(safe-area-inset-top, 0px));
-  left: 14px;
-  height: 42px;
-  display: flex;
-  align-items: center;
-  padding: 0 14px;
-  border-radius: 99px;
-  font: 600 11px Manrope, system-ui, sans-serif;
-  color: var(--tx);
-  cursor: pointer;
-}
-
-.chg input {
-  display: none;
-}
-
 .star {
   position: absolute;
   right: 24px;
-  top: calc(150px + env(safe-area-inset-top, 0px));
-  width: 76px;
+  top: calc(84px + env(safe-area-inset-top, 0px));
+  width: 84px;
   filter: drop-shadow(0 0 18px rgba(190, 215, 255, 0.45));
-  opacity: 0.9;
+  opacity: 0.5;
 }
 
 .quote {
@@ -307,4 +294,16 @@
 .qk {
   display: flex;
   gap: 6px;
+}
+
+/* Aperçu dans le réglage du fond : même rendu que l'accueil, qu'on déplace au doigt. */
+.bgstage {
+  touch-action: none;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.bgstage .quote {
+  pointer-events: none;
 }

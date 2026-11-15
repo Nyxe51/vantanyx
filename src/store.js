@@ -11,7 +11,7 @@ const fresh = () => ({
   profile: { pseudo: 'Nyxe' },
   rules: defaultRules,
   days: {}, // { 'AAAA-MM-JJ': { v: { <idRègle>: valeur }, pct: 0-100, ex: false } }
-  ui: { bg: null, colorIndex: 0 },
+  ui: { bg: null, bgFit: null, colorIndex: 0 }, // bgFit : cadrage du fond { x, y, z } (voir logic/bgfit.js)
 });
 
 function load() {
@@ -90,8 +90,15 @@ export const actions = {
     commit();
   },
 
-  setBackground(dataUrl) {
+  setBackground(dataUrl, fit) {
     state.ui.bg = dataUrl;
+    state.ui.bgFit = fit || null;
+    commit();
+  },
+
+  clearBackground() {
+    state.ui.bg = null;
+    state.ui.bgFit = null;
     commit();
   },
 };

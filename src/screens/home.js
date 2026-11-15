@@ -61,7 +61,6 @@ export function renderHome(state, d, view) {
 
   return `
     <div class="hero${state.ui.bg ? ' has-bg' : ''}">
-      <label class="chg glass">Changer le fond<input type="file" accept="image/*" data-bgfile></label>
       ${state.ui.bg ? '' : star}
       <p class="quote" data-act="quote">${esc(quote)}</p>
     </div>
