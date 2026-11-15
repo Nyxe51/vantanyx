@@ -1,15 +1,10 @@
 /* Coquille : zone de contenu, barre du bas, bouton menu, menu latéral, sous-écrans. */
-/* Distance entre le bas de l'écran et la barre du bas. */
-:root {
-  --nav-b: max(10px, calc(env(safe-area-inset-bottom, 0px) - 12px));
-}
-
 main {
   position: absolute;
   inset: 0;
   overflow-y: auto;
   overscroll-behavior-y: contain;
-  padding: 0 0 calc(var(--nav-b) + 100px);
+  padding: 0 0 calc(92px + env(safe-area-inset-bottom, 0px));
 }
 
 .top {
@@ -27,7 +22,7 @@ main {
   position: absolute;
   left: 12px;
   right: 12px;
-  bottom: var(--nav-b);
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px));
   display: flex;
   padding: 8px;
   z-index: 5;
