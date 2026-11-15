@@ -41,10 +41,14 @@ body {
   background: radial-gradient(circle at 50% 0, var(--acd), #000 60%);
 }
 
-/* Fixé aux 4 bords de l'écran : en appli installée sur iPhone, `height: 100%` laisse une bande vide en bas. */
+/* Fixé à l'écran. En appli installée sur iPhone, la hauteur est donnée par --app-h (voir logic/viewport.js). */
 #app {
   position: fixed;
-  inset: 0;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--app-h, auto);
   margin: 0 auto;
   width: 100%;
   max-width: 430px;

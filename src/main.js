@@ -10,10 +10,13 @@ import { derive } from './logic/derive.js';
 import { applyTheme } from './logic/theme.js';
 import { initHold } from './logic/hold.js';
 import { fileToDataUrl } from './logic/images.js';
+import { watchViewport } from './logic/viewport.js';
 import { mountShell, renderNav, setDrawer, setSub } from './ui/shell.js';
 import { renderHome } from './screens/home.js';
 import { renderSoon, renderSubScreen } from './screens/soon.js';
 import ranksData from './data/ranks.json';
+
+watchViewport();
 
 const app = document.getElementById('app');
 mountShell(app);
