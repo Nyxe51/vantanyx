@@ -1,0 +1,113 @@
+/* Rang et badges, Couleurs. */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+
+td {
+  padding: 9px 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+tr:last-child td {
+  border-bottom: 0;
+}
+
+.sw {
+  display: block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+}
+
+.on-b {
+  box-shadow: 0 0 0 1px var(--ac) inset;
+}
+
+.off {
+  opacity: 0.5;
+}
+
+/* Pastilles de couleur */
+.orbcard {
+  text-align: center;
+  cursor: pointer;
+}
+
+.orbcard.off {
+  cursor: default;
+}
+
+.orb {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  margin: 4px auto 10px;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 0 22px rgba(255, 255, 255, 0.08);
+}
+
+.orb svg {
+  width: 22px;
+  height: 22px;
+  stroke: #7c8794;
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Badges */
+.bdg-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.bdg {
+  text-align: center;
+  margin: 0;
+}
+
+.bdg-art {
+  font-size: 34px;
+  line-height: 56px;
+  display: grid;
+  place-items: center;
+  height: 56px;
+}
+
+.bdg-art svg {
+  width: 24px;
+  height: 24px;
+  stroke: #7c8794;
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Boutons − / + (mode test) */
+.stp {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stp button {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid var(--bd);
+  background: var(--gl);
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.stp b {
+  min-width: 46px;
+  text-align: center;
+}

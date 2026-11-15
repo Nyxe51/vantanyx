@@ -96,6 +96,18 @@ export const actions = {
     commit();
   },
 
+  // Couleur de l'appli : l'index d'un rang débloqué (voir derive : jamais au-delà du rang atteint).
+  setColor(index) {
+    state.ui.colorIndex = index;
+    commit();
+  },
+
+  // Mode test (temporaire) : level = nombre, ou null pour revenir au vrai niveau.
+  setDevLevel(level) {
+    state.dev = { level: level || null };
+    commit();
+  },
+
   clearBackground() {
     state.ui.bg = null;
     state.ui.bgFit = null;

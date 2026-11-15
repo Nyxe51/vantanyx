@@ -3,6 +3,7 @@ import './styles/glass.css';
 import './styles/components.css';
 import './styles/shell.css';
 import './styles/home.css';
+import './styles/ranks.css';
 
 import { getState, subscribe, actions, transient } from './store.js';
 import { parse, onChange, goTab, openSub, closeSub } from './router.js';
@@ -14,6 +15,7 @@ import { mountShell, renderNav, setDrawer, setSub } from './ui/shell.js';
 import { renderHome } from './screens/home.js';
 import { renderSoon, renderSubScreen } from './screens/soon.js';
 import { renderSettings } from './screens/settings.js';
+import { renderRanks, renderColors } from './screens/ranks.js';
 import { renderBackground, initDraft, resetDraft, chooseFile, saveDraft, resetFit, removeBackground, bindBackgroundEditor } from './screens/background.js';
 import { DEFAULT_FIT } from './logic/bgfit.js';
 import ranksData from './data/ranks.json';
@@ -31,8 +33,10 @@ let shownFit = '';
 let shownDay = null;
 
 // Contenu du sous-écran ouvert (menu latéral, réglages…).
-function subHtml(name, state) {
+function subHtml(name, state, d) {
   if (name === 'reglages') return renderSettings(state);
+  if (name === 'rangs') return renderRanks(state, d);
+  if (name === 'couleurs') return renderColors(state, d);
   if (name === 'fond') return renderBackground();
   return renderSubScreen(name);
 }
@@ -67,7 +71,7 @@ function render() {
   main.innerHTML = route.tab === 'accueil' ? renderHome(state, d, view) : renderSoon(route.tab);
 
   renderNav(route.tab);
-  setSub(route.sub ? subHtml(route.sub, state) : null);
+  setSub(route.sub ? subHtml(route.sub, state, d) : null);
   shownDay = d.today;
 }
 
@@ -98,6 +102,14 @@ document.addEventListener('click', (e) => {
       view.quoteOffset++;
       render();
       break;
+    case 'color':
+      actions.setColor(Number(arg));
+      break;
+    case 'dev-level': {
+      const cur = derive(getState(), ranksData.ranks).level;
+      actions.setDevLevel(arg === 'reset' ? null : Math.max(1, cur + Number(arg)));
+      break;
+    }
     case 'bg-save':
       if (saveDraft()) closeSub();
       break;

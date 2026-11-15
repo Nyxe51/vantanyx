@@ -1,6 +1,6 @@
 import { todayKey } from './dates.js';
 import { dayPercent, rulesDone } from './rules.js';
-import { levelProgress } from './xp.js';
+import { levelProgress, xpAt } from './xp.js';
 import { rankIndexForLevel } from './ranks.js';
 import { totalXp, monthPercent } from './stats.js';
 
@@ -10,7 +10,13 @@ export function derive(state, ranks) {
   const day = state.days[today] || { v: {}, ex: false };
   const pct = dayPercent(state.rules, day.v);
   const xp = totalXp(state.days, today) + (day.ex ? 0 : pct);
-  const lp = levelProgress(xp);
+  let lp = levelProgress(xp);
+  // Mode test (temporaire) : force un niveau pour voir les rangs et les couleurs sans attendre des mois.
+  const forced = state.dev && state.dev.level;
+  if (forced) {
+    const needed = xpAt(forced + 1) - xpAt(forced);
+    lp = { level: forced, into: Math.round(needed / 2), needed, ratio: 0.5 };
+  }
   const rankIdx = rankIndexForLevel(lp.level, ranks);
   const colorIdx = Math.min(state.ui.colorIndex || 0, rankIdx);
   return {
@@ -22,6 +28,9 @@ export function derive(state, ranks) {
     xp,
     level: lp.level,
     levelRatio: lp.ratio,
+    levelInto: lp.into,
+    levelNeeded: lp.needed,
+    forced: !!forced,
     rankIdx,
     rank: ranks[rankIdx],
     hue: ranks[colorIdx].hue,
