@@ -10,7 +10,8 @@
     <!-- Installation sur l'écran d'accueil de l'iPhone (Safari) -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <!-- "black" (et pas "black-translucent") : sur iOS 26, la barre translucide raccourcit la fenêtre de l'appli installée d'une hauteur de barre d'état (bogue WebKit 301108) = bande noire en bas. -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <meta name="apple-mobile-web-app-title" content="Vantanyx" />
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
 

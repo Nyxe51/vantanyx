@@ -17,6 +17,8 @@
   --mu: #a3acb7;
   --gl: rgba(255, 255, 255, 0.06);
   --bd: rgba(200, 225, 255, 0.16);
+  /* Distance de la barre du bas au bord de l'écran : proche du bord, mais au-dessus de l'indicateur d'accueil (iPhone 12 à 17). */
+  --nav-b: max(10px, calc(env(safe-area-inset-bottom, 0px) - 16px));
 }
 
 *,
@@ -35,23 +37,28 @@ body {
   font: 14px/1.45 Manrope, system-ui, sans-serif;
 }
 
+/* Filet de sécurité iOS 26 (appli installée avec barre d'état translucide) : tant que la page est plus courte que l'écran,
+   iOS raccourcit la fenêtre ; on garde donc la page au moins aussi haute que l'écran. Sans effet avec une barre d'état opaque. */
+html.standalone {
+  min-height: min(100lvh, calc(100% + env(safe-area-inset-top, 0px)));
+}
+
 body {
   display: flex;
   justify-content: center;
   background: radial-gradient(circle at 50% 0, var(--acd), #000 60%);
 }
 
-/* Fixé à l'écran. En appli installée sur iPhone, la hauteur est donnée par --app-h (voir logic/viewport.js). */
+/* Collé aux quatre bords de la zone visible : aucune hauteur forcée. */
 #app {
   position: fixed;
   top: 0;
   bottom: 0;
   left: 0;
   right: 0;
-  height: var(--app-h, auto);
   margin: 0 auto;
   width: 100%;
-  max-width: 430px;
+  max-width: 480px;
   overflow: hidden;
   background:
     radial-gradient(circle at 12% 28%, rgba(140, 180, 255, 0.16), transparent 38%),
