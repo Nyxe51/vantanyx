@@ -1,0 +1,117 @@
+/* Écran de connexion / chargement. */
+.gate {
+  position: absolute;
+  inset: 0;
+  z-index: 60;
+  display: none;
+  overflow-y: auto;
+  background:
+    radial-gradient(circle at 15% 15%, rgba(140, 180, 255, 0.14), transparent 40%),
+    #030405;
+}
+
+.gate.show {
+  display: block;
+}
+
+.gate-in {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: calc(24px + env(safe-area-inset-top, 0px)) 24px calc(24px + env(safe-area-inset-bottom, 0px));
+}
+
+.gate-in > form,
+.gate-in > .seg {
+  width: 100%;
+}
+
+.gate-logo {
+  width: 160px;
+  max-width: 55%;
+  height: auto;
+  margin-bottom: 10px;
+  filter: drop-shadow(0 0 24px rgba(190, 215, 255, 0.3));
+}
+
+.gate-pulse {
+  animation: gp 1.4s ease-in-out infinite;
+}
+
+@keyframes gp {
+  50% {
+    opacity: 0.4;
+  }
+}
+
+/* Champs : 16 px pour que l'iPhone ne zoome pas la page au toucher. */
+.in {
+  width: 100%;
+  padding: 13px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--bd);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--tx);
+  font: 600 16px Manrope, system-ui, sans-serif;
+  margin-bottom: 12px;
+}
+
+.in::placeholder {
+  color: var(--mu);
+}
+
+.seg {
+  display: flex;
+  padding: 4px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.06);
+  margin-bottom: 14px;
+}
+
+.seg button {
+  flex: 1;
+  padding: 10px;
+  border: 0;
+  background: none;
+  color: var(--mu);
+  font: 600 13px Manrope, system-ui, sans-serif;
+  border-radius: 11px;
+  cursor: pointer;
+}
+
+.seg button.on {
+  background: #fff;
+  color: #000;
+}
+
+.gate-err,
+.gate-info {
+  font-size: 12.5px;
+  margin: -2px 2px 12px;
+  text-align: left;
+}
+
+.gate-err {
+  color: #ff8a8a;
+}
+
+.gate-info {
+  color: #9be3b0;
+}
+
+.gate-link {
+  margin-top: 14px;
+  background: none;
+  border: 0;
+  color: var(--mu);
+  font: 600 13px Manrope, system-ui, sans-serif;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.cta:disabled {
+  opacity: 0.6;
+}

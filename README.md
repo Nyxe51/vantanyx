@@ -32,6 +32,14 @@ Réglage à faire une seule fois : **Settings → Pages → Source : GitHub Acti
 - `src/assets/` : logo (webp + svg)
 - `.github/workflows/deploy.yml` : publication automatique sur GitHub Pages
 
+## Firebase (comptes et synchronisation)
+
+- `src/config/firebase.config.js` : codes des projets Firebase (test = `DEV`, vraie appli = `PROD`)
+- `src/firebase.js` : démarrage de Firebase (si aucune config : l'appli reste en mode local, sans compte)
+- `src/auth.js` : connexion, inscription, mot de passe oublié, déconnexion
+- `src/sync.js` : lecture et envoi des données (un document par jour, fond d'accueil à part)
+- `firestore.rules` : règles de sécurité à coller dans la console Firebase (Firestore → Règles → Publier)
+
 ## Notes
 
 - Ne lance pas `npm audit fix --force` : les alertes `npm audit` concernent des outils de construction, pas l'appli publiée, et la commande casserait la config PWA.

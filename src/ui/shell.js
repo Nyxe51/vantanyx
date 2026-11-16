@@ -31,6 +31,7 @@ export function mountShell(app) {
       <nav>${MENU.map(([k, l]) => `<button data-act="sub" data-arg="${k}">${l}</button>`).join('')}</nav>
     </aside>
     <section class="sub" id="sub" aria-hidden="true"></section>
+    <section class="gate" id="gate"></section>
   `;
 }
 

@@ -4,8 +4,14 @@ import './styles/components.css';
 import './styles/shell.css';
 import './styles/home.css';
 import './styles/ranks.css';
+import './styles/gate.css';
 
-import { getState, subscribe, actions, transient } from './store.js';
+import { getState, subscribe, actions, transient, startRemote, stopRemote } from './store.js';
+import { firebaseEnabled, db } from './firebase.js';
+import { watchAuth, signIn, signUp, resetPassword, signOutUser, authErrorMessage, takePendingPseudo } from './auth.js';
+import { createSync } from './sync.js';
+import { doc, collection, onSnapshot, setDoc, deleteDoc, writeBatch } from 'firebase/firestore';
+import { gate, renderGate } from './screens/gate.js';
 import { parse, onChange, goTab, openSub, closeSub } from './router.js';
 import { derive } from './logic/derive.js';
 import { applyTheme } from './logic/theme.js';
@@ -31,6 +37,7 @@ const view = { quoteOffset: 0, pop: '' };
 let shownBg = null;
 let shownFit = '';
 let shownDay = null;
+let ready = !firebaseEnabled; // en mode compte : vrai quand les données du compte sont chargées
 
 // Contenu du sous-écran ouvert (menu latéral, réglages…).
 function subHtml(name, state, d) {
@@ -42,6 +49,7 @@ function subHtml(name, state, d) {
 }
 
 function render() {
+  if (firebaseEnabled && !ready) return; // tant que le compte n'est pas chargé, l'écran de chargement reste affiché
   const state = getState();
   const route = parse();
   const d = derive(state, ranksData.ranks);
@@ -110,6 +118,18 @@ document.addEventListener('click', (e) => {
       actions.setDevLevel(arg === 'reset' ? null : Math.max(1, cur + Number(arg)));
       break;
     }
+    case 'auth-mode':
+      gate.mode = arg;
+      gate.msg = '';
+      gate.info = '';
+      renderGate();
+      break;
+    case 'logout':
+      signOutUser();
+      break;
+    case 'reload':
+      location.reload();
+      break;
     case 'bg-save':
       if (saveDraft()) closeSub();
       break;
@@ -145,6 +165,88 @@ initHold(main, (id, j, wasDone) => actions.setCheck(id, j, !wasDone));
 
 subscribe(render);
 onChange(render);
+
+// --- Compte (Firebase) ---
+let sync = null;
+let stopListening = null;
+let currentUid = null;
+
+function startSession(user) {
+  if (currentUid === user.uid) return;
+  currentUid = user.uid;
+  ready = false;
+  gate.view = 'loading';
+  renderGate();
+  sync = createSync({ db, fs: { doc, collection, onSnapshot, setDoc, deleteDoc, writeBatch } });
+  startRemote(sync.backend(user.uid), { email: user.email, uid: user.uid });
+  stopListening = sync.listen(user.uid, {
+    pseudo: () => takePendingPseudo() || user.displayName || (user.email || '').split('@')[0] || 'Nyxe',
+    onReady() {
+      ready = true;
+      gate.view = null;
+      renderGate();
+      render();
+    },
+    onError(err) {
+      console.warn(err);
+      gate.view = 'error';
+      gate.msg =
+        err && err.code === 'permission-denied'
+          ? 'Accès refusé à tes données (permission-denied). Les règles de sécurité Firestore ne sont sans doute pas publiées sur ce projet.'
+          : `Impossible de charger tes données${err && err.code ? ` (${err.code})` : ''}. Vérifie ta connexion.`;
+      renderGate();
+    },
+  });
+}
+
+function endSession() {
+  if (stopListening) stopListening();
+  stopListening = null;
+  sync = null;
+  currentUid = null;
+  ready = false;
+  stopRemote();
+  resetDraft();
+  gate.view = 'auth';
+  gate.mode = 'login';
+  gate.msg = '';
+  gate.info = '';
+  renderGate();
+}
+
+// Envoi des formulaires de connexion / inscription / mot de passe oublié.
+document.addEventListener('submit', async (e) => {
+  const form = e.target.closest('[data-authform]');
+  if (!form) return;
+  e.preventDefault();
+  if (gate.busy) return;
+  const fd = new FormData(form);
+  gate.email = String(fd.get('email') || '').trim();
+  gate.pseudo = String(fd.get('pseudo') || '').trim();
+  const password = String(fd.get('password') || '');
+  gate.busy = true;
+  gate.msg = '';
+  gate.info = '';
+  renderGate();
+  try {
+    if (gate.mode === 'login') await signIn(gate.email, password);
+    else if (gate.mode === 'signup') await signUp(gate.pseudo || gate.email.split('@')[0], gate.email, password);
+    else {
+      await resetPassword(gate.email);
+      gate.info = 'Si un compte existe avec cet e-mail, un lien vient d’être envoyé. Pense à regarder les spams.';
+    }
+  } catch (err) {
+    gate.msg = authErrorMessage(err);
+  }
+  gate.busy = false;
+  renderGate();
+});
+
+if (firebaseEnabled) {
+  gate.view = 'loading';
+  renderGate();
+  watchAuth((user) => (user ? startSession(user) : endSession()));
+}
 
 // Si on passe minuit pendant que l'appli est ouverte, on repart sur un nouveau jour.
 document.addEventListener('visibilitychange', () => {
