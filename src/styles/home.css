@@ -307,3 +307,39 @@
 .bgstage .quote {
   pointer-events: none;
 }
+
+/* Badge du rang à côté de la pastille, sur la carte profil */
+.rkrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.rkbadge {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  margin: -6px 0;
+}
+
+/* Étiquette « TEST » : présente seulement dans l'environnement de test */
+.envtag {
+  position: absolute;
+  top: calc(18px + env(safe-area-inset-top, 0px));
+  left: 16px;
+  z-index: 2;
+  padding: 6px 12px;
+  border-radius: 99px;
+  font: 700 11px Unbounded, system-ui, sans-serif;
+  letter-spacing: 0.08em;
+  color: #1a1100;
+  background: #ffb84d;
+  box-shadow: 0 0 18px rgba(255, 184, 77, 0.5);
+}
+
+.envtag.static {
+  position: static;
+  display: inline-block;
+  margin-bottom: 8px;
+  font-size: 10px;
+}

@@ -7,7 +7,7 @@ import './styles/ranks.css';
 import './styles/gate.css';
 
 import { getState, subscribe, actions, transient, startRemote, stopRemote } from './store.js';
-import { firebaseEnabled, db } from './firebase.js';
+import { firebaseEnabled, db, projectId } from './firebase.js';
 import { watchAuth, signIn, signUp, resetPassword, signOutUser, authErrorMessage, takePendingPseudo } from './auth.js';
 import { createSync } from './sync.js';
 import { doc, collection, onSnapshot, setDoc, deleteDoc, writeBatch } from 'firebase/firestore';
@@ -177,7 +177,7 @@ function startSession(user) {
   ready = false;
   gate.view = 'loading';
   renderGate();
-  sync = createSync({ db, fs: { doc, collection, onSnapshot, setDoc, deleteDoc, writeBatch } });
+  sync = createSync({ db, fs: { doc, collection, onSnapshot, setDoc, deleteDoc, writeBatch }, importedFlag: `vantanyx:legacy-imported:${projectId}` });
   startRemote(sync.backend(user.uid), { email: user.email, uid: user.uid });
   stopListening = sync.listen(user.uid, {
     pseudo: () => takePendingPseudo() || user.displayName || (user.email || '').split('@')[0] || 'Nyxe',

@@ -1,0 +1,12 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // PROJET DE TEST (vantanyx-dev) : un seul compte autorisé, le tien (admin).
+    // Remplace REMPLACE_PAR_TON_UID par ton UID : console Firebase → Authentication → Utilisateurs → colonne « UID de l'utilisateur ».
+    match /users/{uid}/{document=**} {
+      allow read, write: if request.auth != null
+                         && request.auth.uid == uid
+                         && uid == 'REMPLACE_PAR_TON_UID';
+    }
+  }
+}

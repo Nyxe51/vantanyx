@@ -1,4 +1,5 @@
 import { esc } from '../ui/html.js';
+import { isTest } from '../env.js';
 
 // Réglages : compte et fond d'accueil pour l'instant. D'autres réglages arriveront ici.
 export function renderSettings(state) {
@@ -8,6 +9,7 @@ export function renderSettings(state) {
       ${
         state.account
           ? `<div class="glass card"><div class="mu">Connecté</div><b>${esc(state.account.email || '')}</b>
+              ${isTest ? '<div class="mu" style="margin-top:6px">Environnement de test (compte admin)</div>' : ''}
               <button class="btn" style="margin-top:10px" data-act="logout">Se déconnecter</button></div>`
           : '<div class="glass card"><b>Mode local</b><div class="mu">Tes données restent sur cet appareil, sans compte.</div></div>'
       }

@@ -1,6 +1,7 @@
 // Écran d'accueil de l'appli avant d'être connecté : chargement, connexion / inscription / mot de passe oublié, erreur.
 import { esc } from '../ui/html.js';
 import logoUrl from '../assets/logo.webp';
+import { isTest } from '../env.js';
 
 export const gate = { view: null, mode: 'login', msg: '', info: '', busy: false, email: '', pseudo: '' };
 
@@ -30,12 +31,14 @@ export function renderGate() {
     return;
   }
 
-  const m = gate.mode;
+  // Environnement de test : un seul compte, donc pas d'inscription.
+  const m = isTest && gate.mode === 'signup' ? 'login' : gate.mode;
   const tab = (k, label) => `<button type="button" class="${m === k ? 'on' : ''}" data-act="auth-mode" data-arg="${k}">${label}</button>`;
   el.innerHTML = `<div class="gate-in">${logo}
     <h1 class="chr" style="font-size:26px">Vantanyx</h1>
+    ${isTest ? '<p class="envtag static">ENVIRONNEMENT DE TEST</p>' : ''}
     <p class="mu" style="margin:4px 0 16px">${m === 'reset' ? 'On t’envoie un lien pour choisir un nouveau mot de passe.' : 'Reste focus, chaque jour.'}</p>
-    ${m === 'reset' ? '' : `<div class="seg">${tab('login', 'Connexion')}${tab('signup', 'Inscription')}</div>`}
+    ${m === 'reset' || isTest ? '' : `<div class="seg">${tab('login', 'Connexion')}${tab('signup', 'Inscription')}</div>`}
     <form data-authform autocomplete="on">
       ${m === 'signup' ? `<input class="in" name="pseudo" placeholder="Pseudo" autocomplete="nickname" maxlength="24" required value="${esc(gate.pseudo)}">` : ''}
       <input class="in" type="email" name="email" placeholder="E-mail" autocomplete="email" inputmode="email" autocapitalize="none" required value="${esc(gate.email)}">

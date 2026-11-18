@@ -4,6 +4,7 @@
 import defaultRules from './data/default-rules.json';
 import { dayPercent } from './logic/rules.js';
 import { todayKey } from './logic/dates.js';
+import { isTest } from './env.js';
 
 const LOCAL_KEY = 'vantanyx:state:v1';
 
@@ -161,6 +162,7 @@ export const actions = {
 
   // Mode test (temporaire) : level = nombre, ou null pour revenir au vrai niveau. Reste sur l'appareil.
   setDevLevel(level) {
+    if (!isTest) return; // jamais dans la vraie appli
     state.dev = { level: level || null };
     if (!backend) saveLocal();
     notify();

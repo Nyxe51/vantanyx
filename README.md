@@ -32,13 +32,27 @@ Réglage à faire une seule fois : **Settings → Pages → Source : GitHub Acti
 - `src/assets/` : logo (webp + svg)
 - `.github/workflows/deploy.yml` : publication automatique sur GitHub Pages
 
+## Deux environnements : test et vraie appli
+
+| | Test | Vraie appli (tous les jours) |
+|---|---|---|
+| Où ça tourne | `npm run dev` sur ton PC (adresse localhost) | le site publié sur GitHub Pages |
+| Projet Firebase | `vantanyx-dev` | `vantanyx-prod` |
+| Comptes | un seul (toi, admin), pas d'inscription | toi et ton ami |
+| Règles Firestore | `firestore.test.rules` | `firestore.rules` |
+| Outils de test (niveau, couleurs…) | visibles, étiquette « TEST » orange | absents |
+
+Les données des deux projets sont totalement séparées : rien de ce que tu fais en test n'atteint la vraie appli.
+Le choix se fait dans `src/config/firebase.config.js` (voir les commentaires) et `src/env.js`.
+
 ## Firebase (comptes et synchronisation)
 
 - `src/config/firebase.config.js` : codes des projets Firebase (test = `DEV`, vraie appli = `PROD`)
+- `src/env.js` : décide de l'environnement (test / vraie appli / local)
 - `src/firebase.js` : démarrage de Firebase (si aucune config : l'appli reste en mode local, sans compte)
 - `src/auth.js` : connexion, inscription, mot de passe oublié, déconnexion
 - `src/sync.js` : lecture et envoi des données (un document par jour, fond d'accueil à part)
-- `firestore.rules` : règles de sécurité à coller dans la console Firebase (Firestore → Règles → Publier)
+- `firestore.rules` (vraie appli) et `firestore.test.rules` (test) : règles de sécurité à coller dans la console Firebase (Firestore → Règles → Publier)
 
 ## Notes
 

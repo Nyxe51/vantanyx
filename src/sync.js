@@ -6,9 +6,8 @@
 import defaultRules from './data/default-rules.json';
 import * as store from './store.js';
 
-const IMPORTED_FLAG = 'vantanyx:legacy-imported';
-
-export function createSync({ db, fs, storage = globalThis.localStorage, ask = (m) => globalThis.confirm(m) }) {
+export function createSync({ db, fs, storage = globalThis.localStorage, ask = (m) => globalThis.confirm(m), importedFlag = 'vantanyx:legacy-imported' }) {
+  const IMPORTED_FLAG = importedFlag; // un drapeau par projet Firebase : on peut importer dans le test puis dans la vraie appli
   const { doc, collection, onSnapshot, setDoc, deleteDoc, writeBatch } = fs;
   const warn = (e) => console.warn('Synchronisation impossible', e);
 

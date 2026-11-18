@@ -2,6 +2,8 @@ import { esc } from '../ui/html.js';
 import { icons, star } from '../ui/icons.js';
 import { ruleProgress } from '../logic/rules.js';
 import quotes from '../data/quotes.json';
+import { badgeUrl } from '../ui/badges.js';
+import { isTest } from '../env.js';
 
 const fmtL = (cl) => String(cl / 100).replace('.', ',');
 
@@ -61,6 +63,7 @@ export function renderHome(state, d, view) {
 
   return `
     <div class="hero${state.ui.bg ? ' has-bg' : ''}">
+      ${isTest ? '<span class="envtag" title="Environnement de test">TEST</span>' : ''}
       ${state.ui.bg ? '' : star}
       <p class="quote" data-act="quote">${esc(quote)}</p>
     </div>
@@ -68,7 +71,7 @@ export function renderHome(state, d, view) {
     <div class="prof glass">
       <div class="av"><span class="u chr">${initial}</span></div>
       <div style="flex:1">
-        <div class="row"><b class="u" style="font-size:15px">${esc(state.profile.pseudo)}</b><span class="rk">${esc(d.rank.name)}</span></div>
+        <div class="row"><b class="u" style="font-size:15px">${esc(state.profile.pseudo)}</b><span class="rkrow"><img class="rkbadge" src="${badgeUrl(d.rank.id)}" alt=""><span class="rk">${esc(d.rank.name)}</span></span></div>
         <div class="row mu num" style="margin:3px 0 7px"><span>Niveau ${d.level}</span><span>+${d.pct} XP aujourd’hui</span></div>
         <div class="bar"><i style="width:${Math.round(d.levelRatio * 100)}%"></i></div>
       </div>

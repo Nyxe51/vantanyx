@@ -1,5 +1,7 @@
 import { esc } from '../ui/html.js';
 import { icons } from '../ui/icons.js';
+import { badgeUrl } from '../ui/badges.js';
+import { isTest } from '../env.js';
 import ranksData from '../data/ranks.json';
 
 const RANKS = ranksData.ranks;
@@ -18,7 +20,7 @@ export function renderRanks(state, d) {
 
   const rankBadges = RANKS.map((r, i) => {
     const ok = i <= d.rankIdx;
-    return `<div class="glass card bdg${ok ? '' : ' off'}"><div class="u chr bdg-art">${ok ? '✦' : icons.lock}</div><div class="mu">${esc(r.name)}</div></div>`;
+    return `<div class="glass card bdg${ok ? '' : ' off'}"><div class="bdg-art"><img src="${badgeUrl(r.id)}" alt="Badge ${esc(r.name)}"${ok ? '' : ' class="locked"'}>${ok ? '' : `<span class="bdg-lock">${icons.lock}</span>`}</div><div class="mu">${esc(r.name)}</div></div>`;
   }).join('');
 
   const special = SPECIAL_BADGES.map(
@@ -30,7 +32,8 @@ export function renderRanks(state, d) {
       <h2 style="margin-bottom:12px">Rang et badges</h2>
 
       <div class="glass card">
-        <div class="row"><b class="u chr" style="font-size:20px">${esc(d.rank.name)}</b><span class="mu num">Niveau ${d.level}</span></div>
+        <div class="rankhead"><img class="rankhead-badge" src="${badgeUrl(d.rank.id)}" alt="Badge ${esc(d.rank.name)}">
+          <div><b class="u chr" style="font-size:22px">${esc(d.rank.name)}</b><div class="mu num">Niveau ${d.level}</div></div></div>
         <div class="bar" style="margin:10px 0 6px"><i style="width:${Math.round(d.levelRatio * 100)}%"></i></div>
         <div class="row mu num"><span>${d.levelInto} / ${d.levelNeeded} XP</span><span>${
           next ? `Prochain rang : ${esc(next.name)} (niveau ${next.minLevel})` : 'Rang maximum'
@@ -49,7 +52,9 @@ export function renderRanks(state, d) {
       <h3 style="margin-top:14px">Badges ponctuels</h3>
       <div class="bdg-grid">${special}</div>
 
-      <div class="glass card" style="margin-top:14px">
+      ${
+        isTest
+          ? `<div class="glass card" style="margin-top:14px">
         <div class="row">
           <div><b>Mode test</b><div class="mu">Temporaire : simule un niveau${d.forced ? ' (actif)' : ''}</div></div>
           <div class="stp">
@@ -59,7 +64,9 @@ export function renderRanks(state, d) {
           </div>
         </div>
         ${d.forced ? '<button class="btn" style="margin-top:10px" data-act="dev-level" data-arg="reset">Revenir au vrai niveau</button>' : ''}
-      </div>
+      </div>`
+          : ''
+      }
     </div>`;
 }
 
