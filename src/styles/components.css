@@ -131,3 +131,66 @@ h3 {
   inherits: true;
   initial-value: 0;
 }
+
+/* Bandeau de synchronisation (accueil) et ligne d'état (réglages) */
+.syncbar {
+  margin: 0 0 12px;
+  padding: 9px 14px;
+  border-radius: 14px;
+  font: 600 12px Manrope, system-ui, sans-serif;
+  border: 1px solid var(--bd);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--mu);
+}
+
+.syncbar.warn,
+.syncline.warn {
+  color: #ffd27a;
+}
+
+.syncbar.error,
+.syncline.error {
+  color: #ff8a8a;
+  border-color: rgba(255, 138, 138, 0.4);
+}
+
+.syncline.ok {
+  color: #9be3b0;
+}
+
+/* Bandeau « nouvelle version disponible » et petit message passager */
+.updatebar {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: calc(var(--nav-b) + 84px);
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px 10px 16px;
+  font: 600 13px Manrope, system-ui, sans-serif;
+  background: rgba(14, 16, 20, 0.92);
+}
+
+.updatebar[hidden],
+.toast[hidden] {
+  display: none;
+}
+
+.toast {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(var(--nav-b) + 92px);
+  z-index: 40;
+  max-width: calc(100% - 40px);
+  padding: 10px 16px;
+  border-radius: 99px;
+  background: #fff;
+  color: #000;
+  font: 700 12.5px Manrope, system-ui, sans-serif;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  text-align: center;
+}

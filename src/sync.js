@@ -5,11 +5,12 @@
 // `fs` = les fonctions Firestore, passées en paramètre pour pouvoir tester sans réseau.
 import defaultRules from './data/default-rules.json';
 import * as store from './store.js';
+import { track } from './syncstatus.js';
+import { SCHEMA_VERSION } from './schema.js';
 
 export function createSync({ db, fs, storage = globalThis.localStorage, ask = (m) => globalThis.confirm(m), importedFlag = 'vantanyx:legacy-imported' }) {
   const IMPORTED_FLAG = importedFlag; // un drapeau par projet Firebase : on peut importer dans le test puis dans la vraie appli
   const { doc, collection, onSnapshot, setDoc, deleteDoc, writeBatch } = fs;
-  const warn = (e) => console.warn('Synchronisation impossible', e);
 
   const refs = (uid) => ({
     main: doc(db, 'users', uid),
@@ -21,10 +22,11 @@ export function createSync({ db, fs, storage = globalThis.localStorage, ask = (m
   // Envoi des changements. On n'attend pas la réponse du serveur : hors ligne, Firestore garde l'envoi en attente.
   function backend(uid) {
     const r = refs(uid);
+    // Chaque envoi est suivi (voir syncstatus.js) : la promesse rendue vaut true (réussi) ou false (refusé).
     return {
-      pushMain: (data) => setDoc(r.main, data, { merge: true }).catch(warn),
-      pushDay: (key, day) => setDoc(r.day(key), day).catch(warn),
-      pushBg: (src) => (src ? setDoc(r.bg, { src }).catch(warn) : deleteDoc(r.bg).catch(warn)),
+      pushMain: (data) => track(setDoc(r.main, data, { merge: true })),
+      pushDay: (key, day) => track(setDoc(r.day(key), day)),
+      pushBg: (src) => track(src ? setDoc(r.bg, { src }) : deleteDoc(r.bg)),
     };
   }
 
@@ -43,6 +45,7 @@ export function createSync({ db, fs, storage = globalThis.localStorage, ask = (m
 
     const main = {
       version: 1,
+      schemaVersion: SCHEMA_VERSION,
       profile: { pseudo },
       rules: imported && imported.rules ? imported.rules : JSON.parse(JSON.stringify(defaultRules)),
       ui: { bgFit: (imported && imported.ui && imported.ui.bgFit) || null, colorIndex: (imported && imported.ui && imported.ui.colorIndex) || 0 },
@@ -57,7 +60,7 @@ export function createSync({ db, fs, storage = globalThis.localStorage, ask = (m
     for (let i = 0; i < queue.length; i += 400) {
       const batch = writeBatch(db);
       queue.slice(i, i + 400).forEach((op) => op(batch));
-      batch.commit().catch(warn);
+      track(batch.commit());
     }
 
     store.applyMain(main);
@@ -106,6 +109,11 @@ export function createSync({ db, fs, storage = globalThis.localStorage, ask = (m
               ready.main = true;
               check();
             }
+            return;
+          }
+          // Données écrites par une version plus récente de l'appli : on ne touche à rien (on pourrait les abîmer).
+          if ((snap.data().schemaVersion || 1) > SCHEMA_VERSION) {
+            fail({ code: 'schema-too-new' });
             return;
           }
           if (!snap.metadata.hasPendingWrites) store.applyMain(snap.data());

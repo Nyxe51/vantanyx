@@ -9,7 +9,8 @@ export default defineConfig({
   base: BASE,
   plugins: [
     VitePWA({
-      registerType: 'autoUpdate',
+      // 'prompt' : l'appli prévient quand une nouvelle version est prête (voir main.js), au lieu de changer en cachette.
+      registerType: 'prompt',
       includeAssets: ['favicon.svg', 'favicon-32.png', 'icons/apple-touch-icon.png'],
       manifest: {
         name: 'Vantanyx – Stay Focus',

@@ -4,6 +4,7 @@ import { ruleProgress } from '../logic/rules.js';
 import quotes from '../data/quotes.json';
 import { badgeUrl } from '../ui/badges.js';
 import { isTest } from '../env.js';
+import { syncMessage } from '../syncstatus.js';
 
 const fmtL = (cl) => String(cl / 100).replace('.', ',');
 
@@ -56,7 +57,7 @@ function renderRules(state, d, pop) {
 }
 
 // `d` = résultat de derive(), `view` = état d'affichage (phrase, animation).
-export function renderHome(state, d, view) {
+export function renderHome(state, d, view, sync) {
   const quote = quotes[(new Date().getDate() + view.quoteOffset) % quotes.length];
   const left = d.total - d.done;
   const initial = esc((state.profile.pseudo || '?').trim().charAt(0).toUpperCase());
@@ -78,6 +79,10 @@ export function renderHome(state, d, view) {
     </div>
 
     <div class="pad">
+      ${(() => {
+        const m = state.account && sync ? syncMessage(sync) : null;
+        return m ? `<div class="syncbar ${m.level}" role="status">${esc(m.text)}</div>` : '';
+      })()}
       <div class="glass card ringcard">
         <svg viewBox="0 0 100 100" width="108" height="108" style="flex:none" aria-hidden="true">
           <defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:#fff"/><stop offset="1" style="stop-color:hsl(var(--h) var(--s) 62%)"/></linearGradient></defs>

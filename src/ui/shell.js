@@ -32,6 +32,8 @@ export function mountShell(app) {
     </aside>
     <section class="sub" id="sub" aria-hidden="true"></section>
     <section class="gate" id="gate"></section>
+    <div class="updatebar glass" id="updatebar" hidden><span>Nouvelle version disponible</span><button class="btn" data-act="update">Mettre à jour</button></div>
+    <div class="toast" id="toast" role="status" hidden></div>
   `;
 }
 
@@ -56,4 +58,17 @@ export function setSub(html) {
   el.innerHTML = html;
   el.classList.add('open');
   el.setAttribute('aria-hidden', 'false');
+}
+
+export function setUpdateBar(show) {
+  document.getElementById('updatebar').hidden = !show;
+}
+
+let toastTimer = null;
+export function showToast(text, ms = 3500) {
+  const el = document.getElementById('toast');
+  el.textContent = text;
+  el.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => (el.hidden = true), ms);
 }

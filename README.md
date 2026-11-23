@@ -24,7 +24,10 @@ Réglage à faire une seule fois : **Settings → Pages → Source : GitHub Acti
 - `src/main.js` : point de départ : branche l'état, l'affichage, les clics
 - `src/store.js` : seul fichier qui sait où sont rangées les données (stockage local pour l'instant, Firestore plus tard)
 - `src/router.js` : navigation (`#/accueil`, `#/sport`…)
-- `src/logic/` : calculs purs, sans écran (XP, rangs, % du jour, stats, thème, appui long, photos)
+- `src/version.js` : numéro de version affiché dans les Réglages (à changer à chaque livraison)
+- `src/schema.js` : version de la structure des données et migrations
+- `src/syncstatus.js` : état de la synchronisation (en ligne, envois en attente, erreur)
+- `src/logic/` : calculs purs, sans écran (XP, rangs, % du jour, stats, thème, appui long, photos, sauvegarde)
 - `src/screens/` : un fichier par écran (`home.js`, `soon.js` pour ce qui n'est pas encore fait)
 - `src/ui/` : coquille (barre du bas, menu), icônes
 - `src/styles/` : `base.css`, `glass.css`, `components.css`, `shell.css`, `home.css`

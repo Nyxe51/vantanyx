@@ -5,6 +5,7 @@ import defaultRules from './data/default-rules.json';
 import { dayPercent } from './logic/rules.js';
 import { todayKey } from './logic/dates.js';
 import { isTest } from './env.js';
+import { SCHEMA_VERSION } from './schema.js';
 
 const LOCAL_KEY = 'vantanyx:state:v1';
 
@@ -54,7 +55,7 @@ function saveLocal() {
   }
 }
 
-// `what` dit ce qui a changé : { main: true } | { day: 'AAAA-MM-JJ' } | { bg: true }
+// `what` dit ce qui a changé : { main: true } | { day: 'AAAA-MM-JJ' } | { days: [...] } | { bg: true }
 function commit(what = {}) {
   if (!backend) {
     saveLocal();
@@ -62,6 +63,7 @@ function commit(what = {}) {
     if (what.main) backend.pushMain(mainPayload());
     if (what.day) backend.pushDay(what.day, state.days[what.day]);
     if (what.bg) backend.pushBg(state.ui.bg);
+    if (what.days) what.days.forEach((k) => backend.pushDay(k, state.days[k]));
   }
   notify();
 }
@@ -70,6 +72,7 @@ function commit(what = {}) {
 function mainPayload() {
   return {
     version: 1,
+    schemaVersion: SCHEMA_VERSION,
     profile: state.profile,
     rules: state.rules,
     ui: { bgFit: state.ui.bgFit ?? null, colorIndex: state.ui.colorIndex || 0 },
@@ -166,6 +169,25 @@ export const actions = {
     state.dev = { level: level || null };
     if (!backend) saveLocal();
     notify();
+  },
+
+  // Import d'une sauvegarde déjà vérifiée par parseExport : les jours du fichier remplacent ceux de même date,
+  // les règles, la couleur, le cadrage et (s'il y en a un) le fond sont remplacés. Le pseudo ne change pas.
+  importData(d) {
+    state.rules = d.rules;
+    state.ui = { ...state.ui, colorIndex: d.ui.colorIndex, bgFit: d.ui.bgFit };
+    if (d.bg) state.ui.bg = d.bg;
+    Object.assign(state.days, d.days);
+    commit({ main: true, bg: !!d.bg, days: Object.keys(d.days) });
+  },
+
+  // Renvoie tout ce que l'appareil sait vers Firestore (à utiliser après une erreur d'envoi).
+  // Résultat : true si tout est passé.
+  resyncAll() {
+    if (!backend) return Promise.resolve(true);
+    const jobs = [backend.pushMain(mainPayload()), backend.pushBg(state.ui.bg), ...Object.keys(state.days).map((k) => backend.pushDay(k, state.days[k]))];
+    notify();
+    return Promise.all(jobs).then((r) => r.every(Boolean));
   },
 
   clearBackground() {

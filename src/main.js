@@ -17,7 +17,11 @@ import { derive } from './logic/derive.js';
 import { applyTheme } from './logic/theme.js';
 import { initHold } from './logic/hold.js';
 import { watchViewport } from './logic/viewport.js';
-import { mountShell, renderNav, setDrawer, setSub } from './ui/shell.js';
+import { mountShell, renderNav, setDrawer, setSub, setUpdateBar, showToast } from './ui/shell.js';
+import { registerSW } from 'virtual:pwa-register';
+import { getSyncStatus, subscribeSync, clearSyncError, resetSyncStatus } from './syncstatus.js';
+import { buildExport, exportFileName, parseExport } from './logic/backup.js';
+import { saveJsonFile } from './logic/download.js';
 import { renderHome } from './screens/home.js';
 import { renderSoon, renderSubScreen } from './screens/soon.js';
 import { renderSettings } from './screens/settings.js';
@@ -41,7 +45,7 @@ let ready = !firebaseEnabled; // en mode compte : vrai quand les données du com
 
 // Contenu du sous-écran ouvert (menu latéral, réglages…).
 function subHtml(name, state, d) {
-  if (name === 'reglages') return renderSettings(state);
+  if (name === 'reglages') return renderSettings(state, getSyncStatus());
   if (name === 'rangs') return renderRanks(state, d);
   if (name === 'couleurs') return renderColors(state, d);
   if (name === 'fond') return renderBackground();
@@ -76,7 +80,7 @@ function render() {
 
   view.pop = transient.pop;
   transient.pop = '';
-  main.innerHTML = route.tab === 'accueil' ? renderHome(state, d, view) : renderSoon(route.tab);
+  main.innerHTML = route.tab === 'accueil' ? renderHome(state, d, view, getSyncStatus()) : renderSoon(route.tab);
 
   renderNav(route.tab);
   setSub(route.sub ? subHtml(route.sub, state, d) : null);
@@ -127,6 +131,25 @@ document.addEventListener('click', (e) => {
     case 'logout':
       signOutUser();
       break;
+    case 'export': {
+      const text = JSON.stringify(buildExport(getState()), null, 2);
+      saveJsonFile(exportFileName(), text).then((r) => {
+        if (r === 'downloaded') showToast('Sauvegarde téléchargée.');
+        else if (r === 'shared') showToast('Sauvegarde prête.');
+      });
+      break;
+    }
+    case 'resync':
+      showToast('Envoi en cours…');
+      actions.resyncAll().then((ok) => {
+        if (ok) clearSyncError();
+        showToast(ok ? 'Tout est renvoyé et enregistré.' : 'Le renvoi a échoué : l’erreur persiste.');
+      });
+      break;
+    case 'update':
+      updateSW(true);
+      setTimeout(() => location.reload(), 3000); // filet de sécurité si le rechargement automatique n'a pas lieu
+      break;
     case 'reload':
       location.reload();
       break;
@@ -165,6 +188,43 @@ initHold(main, (id, j, wasDone) => actions.setCheck(id, j, !wasDone));
 
 subscribe(render);
 onChange(render);
+subscribeSync(render); // l'affichage suit l'état de la synchronisation
+
+// Import d'une sauvegarde : on vérifie le fichier, on demande confirmation, puis on importe.
+document.addEventListener('change', async (e) => {
+  const input = e.target.closest('[data-importfile]');
+  if (!input || !input.files[0]) return;
+  const file = input.files[0];
+  input.value = '';
+  const res = parseExport(await file.text());
+  if (!res.ok) {
+    window.alert(res.error);
+    return;
+  }
+  const s = res.dayCount > 1 ? 's' : '';
+  const ok = window.confirm(
+    `Importer ${res.dayCount} jour${s} et ${res.ruleCount} règle${res.ruleCount > 1 ? 's' : ''} ?\n\nLes jours du fichier remplacent ceux de même date. Tes règles, ta couleur et ton fond seront remplacés par ceux du fichier.`,
+  );
+  if (!ok) return;
+  actions.importData(res.data);
+  showToast('Sauvegarde importée.');
+});
+
+// Mise à jour de l'appli : on prévient quand une nouvelle version est prête, et on la cherche régulièrement.
+const updateSW = registerSW({
+  onNeedRefresh() {
+    // Seulement si la page est déjà gérée par l'appli installée ; sinon la nouvelle version s'active toute seule.
+    if (navigator.serviceWorker && navigator.serviceWorker.controller) setUpdateBar(true);
+  },
+  onRegisteredSW(_url, reg) {
+    if (!reg) return;
+    const check = () => reg.update().catch(() => {});
+    setInterval(check, 60 * 60 * 1000);
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) check();
+    });
+  },
+});
 
 // --- Compte (Firebase) ---
 let sync = null;
@@ -191,7 +251,9 @@ function startSession(user) {
       console.warn(err);
       gate.view = 'error';
       gate.msg =
-        err && err.code === 'permission-denied'
+        err && err.code === 'schema-too-new'
+          ? 'Tes données ont été enregistrées par une version plus récente de l’appli. Ferme complètement l’appli puis rouvre-la pour la mettre à jour.'
+          : err && err.code === 'permission-denied'
           ? 'Accès refusé à tes données (permission-denied). Les règles de sécurité Firestore ne sont sans doute pas publiées sur ce projet.'
           : `Impossible de charger tes données${err && err.code ? ` (${err.code})` : ''}. Vérifie ta connexion.`;
       renderGate();
@@ -206,6 +268,7 @@ function endSession() {
   currentUid = null;
   ready = false;
   stopRemote();
+  resetSyncStatus();
   resetDraft();
   gate.view = 'auth';
   gate.mode = 'login';
