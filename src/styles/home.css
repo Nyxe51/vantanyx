@@ -356,3 +356,21 @@
   padding: 12px;
   color: var(--mu);
 }
+
+/* Vrais chiffres (pompes, gainage) */
+.cntrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.btn.cnt {
+  padding: 6px 14px;
+}
+
+.in.big {
+  font: 600 34px Unbounded, system-ui, sans-serif;
+  text-align: center;
+  padding: 16px;
+}

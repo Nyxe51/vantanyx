@@ -5,25 +5,33 @@ import quotes from '../data/quotes.json';
 import { badgeUrl } from '../ui/badges.js';
 import { isTest } from '../env.js';
 import { syncMessage } from '../syncstatus.js';
+import { fmtCount } from '../logic/counts.js';
 
 const fmtL = (cl) => String(cl / 100).replace('.', ',');
 
-function renderRule(rule, value, pop) {
+function renderRule(rule, value, pop, n, rec) {
   const f = ruleProgress(rule, value);
   const done = f === 1;
   const popCls = (k) => (pop === k ? ' pop' : '');
 
   if (rule.type === 'gauge') {
     const cl = value || 0;
-    return `<div class="rule glass${done ? ' done' : ''}" style="--f:${f}">
-      <div class="t">
-        <div class="row"><b>${esc(rule.name)}</b><span class="mu num">${fmtL(cl)} / ${fmtL(rule.goal)} L</span></div>
-        <div class="bar wb"><i style="width:${Math.min((cl / rule.goal) * 100, 100)}%"></i></div>
-        <div class="qk">
+    const quick = rule.unit
+      ? (() => {
+          const st = rule.steps && rule.steps.length ? rule.steps : [5, 10];
+          return `<div class="qk">${st.map((s) => `<button class="btn" data-act="gauge" data-rule="${esc(rule.id)}" data-arg="${s}">+ ${s}</button>`).join('')}<button class="btn ghost" data-act="gauge" data-rule="${esc(rule.id)}" data-arg="${-st[0]}">− ${st[0]}</button></div>`;
+        })()
+      : `<div class="qk">
           <button class="btn" data-act="gauge" data-rule="${rule.id}" data-arg="25">+ 25 cl</button>
           <button class="btn" data-act="gauge" data-rule="${rule.id}" data-arg="50">+ 50 cl</button>
           <button class="btn ghost" data-act="gauge" data-rule="${rule.id}" data-arg="-25">− 25 cl</button>
-        </div>
+        </div>`;
+    return `<div class="rule glass${done ? ' done' : ''}" style="--f:${f}">
+      <div class="t">
+        <div class="row"><b>${esc(rule.name)}</b><span class="mu num">${rule.unit ? `${cl} / ${rule.goal} ${esc(rule.unit)}` : `${fmtL(cl)} / ${fmtL(rule.goal)} L`}</span></div>
+        <div class="bar wb"><i style="width:${Math.min((cl / rule.goal) * 100, 100)}%"></i></div>
+        ${quick}
+        ${rule.unit && rec ? `<div class="mu" style="margin-top:8px">Record ${rec} ${esc(rule.unit)} en une journée</div>` : ''}
       </div></div>`;
   }
 
@@ -41,7 +49,11 @@ function renderRule(rule, value, pop) {
   }
 
   return `<div class="rule glass${done ? ' done' : ''}${popCls(rule.id)}" data-hold="${rule.id}" data-done="${done ? 1 : 0}" style="--f:${f}">
-    <div class="t"><b>${esc(rule.name)}</b>${rule.sub ? `<small>${esc(rule.sub)}</small>` : ''}</div>
+    <div class="t"><b>${esc(rule.name)}</b>${rule.sub ? `<small>${esc(rule.sub)}</small>` : ''}${
+      rule.count
+        ? `<div class="cntrow"><button class="btn cnt" data-act="count" data-rule="${esc(rule.id)}">${n != null ? fmtCount(n, rule.count.unit) : 'Noter'}</button>${rec ? `<span class="mu">Record ${fmtCount(rec, rule.count.unit)}</span>` : ''}</div>`
+        : ''
+    }</div>
     <div class="ck">${icons.ok}</div></div>`;
 }
 
@@ -52,7 +64,7 @@ function renderRules(state, d, pop) {
     .map((rule) => {
       const header = rule.group && rule.group !== lastGroup ? `<div class="gh">${esc(rule.group)}</div>` : '';
       lastGroup = rule.group || lastGroup;
-      return header + renderRule(rule, d.values[rule.id], pop);
+      return header + renderRule(rule, d.values[rule.id], pop, d.counts[rule.id], d.records[rule.id]);
     })
     .join('');
 }

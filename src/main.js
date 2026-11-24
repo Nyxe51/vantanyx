@@ -26,6 +26,8 @@ import { saveJsonFile } from './logic/download.js';
 import { renderHome } from './screens/home.js';
 import { renderSoon, renderSubScreen } from './screens/soon.js';
 import { renderSettings } from './screens/settings.js';
+import { renderCount, setCounting, getCounting } from './screens/count.js';
+import { MAX_COUNT } from './logic/counts.js';
 import { renderRulesEditor, renderRuleForm, setEditing, getEditing } from './screens/rules.js';
 import { isActive } from './logic/rules.js';
 import { renderRanks, renderColors } from './screens/ranks.js';
@@ -54,6 +56,7 @@ function subHtml(name, state, d) {
   if (name === 'fond') return renderBackground();
   if (name === 'regles') return renderRulesEditor(state);
   if (name === 'regle') return renderRuleForm(state);
+  if (name === 'saisie') return renderCount(state, d);
   return renderSubScreen(name);
 }
 
@@ -89,7 +92,9 @@ function render() {
 
   renderNav(route.tab);
   // Le formulaire d'une règle n'est pas réaffiché pendant la saisie (une synchro ne doit pas effacer ce qu'on tape).
-  const typing = route.sub === 'regle' && document.getElementById('rf-name');
+  // (seulement si le sous-écran est déjà ouvert : sinon un formulaire resté en mémoire empêcherait de le rouvrir)
+  const subOpen = document.getElementById('sub').classList.contains('open');
+  const typing = subOpen && ((route.sub === 'regle' && document.getElementById('rf-name')) || (route.sub === 'saisie' && document.getElementById('cn-val')));
   if (!typing) setSub(route.sub ? subHtml(route.sub, state, d) : null);
   shownDay = d.today;
 }
@@ -203,6 +208,35 @@ document.addEventListener('click', (e) => {
       }
       break;
     }
+    case 'count':
+      setCounting(rule);
+      openSub('saisie');
+      break;
+    case 'cnt-step': {
+      const inp = document.getElementById('cn-val');
+      if (inp) inp.value = Math.min(MAX_COUNT, Math.max(0, (Number(inp.value) || 0) + Number(arg)));
+      break;
+    }
+    case 'cnt-save': {
+      const raw = document.getElementById('cn-val').value.trim();
+      const v = Number(raw);
+      if (raw === '' || !Number.isFinite(v) || v < 0 || v > MAX_COUNT) {
+        showToast('Entre un nombre entre 0 et ' + MAX_COUNT + '.');
+        break;
+      }
+      const res = actions.setCount(getCounting(), Math.round(v));
+      if (res.error) showToast(res.error);
+      else {
+        closeSub();
+        showToast(res.validated ? 'Règle validée !' : 'Chiffre noté.');
+      }
+      break;
+    }
+    case 'cnt-clear':
+      actions.setCount(getCounting(), null);
+      closeSub();
+      showToast('Chiffre effacé.');
+      break;
     case 'ex-on':
       if (window.confirm('Mettre cette journée de côté ?\n\nElle sera hors du % du mois et ne rapportera aucun XP. Tu pourras la remettre quand tu veux.')) actions.setExceptional(true);
       break;
@@ -299,7 +333,7 @@ function startSession(user) {
     pseudo: () => takePendingPseudo() || user.displayName || (user.email || '').split('@')[0] || 'Nyxe',
     onReady() {
       ready = true;
-      actions.migrateNames();
+      actions.migrateRules();
       gate.view = null;
       renderGate();
       render();
@@ -377,5 +411,5 @@ setInterval(() => {
   if (d.today !== shownDay) render();
 }, 60000);
 
-if (!firebaseEnabled) actions.migrateNames();
+if (!firebaseEnabled) actions.migrateRules();
 render();

@@ -3,6 +3,7 @@ import { dayPercent, rulesDone, activeRules } from './rules.js';
 import { levelProgress, xpAt } from './xp.js';
 import { rankIndexForLevel } from './ranks.js';
 import { totalXp, monthPercent } from './stats.js';
+import { countRecords } from './counts.js';
 
 // Tout ce qu'on affiche, calculé à partir de l'état (une seule source de vérité).
 export function derive(state, ranks) {
@@ -24,6 +25,8 @@ export function derive(state, ranks) {
   return {
     today,
     values: day.v,
+    counts: day.n || {},
+    records: countRecords(state.days, state.rules),
     pct,
     ex,
     xpToday,

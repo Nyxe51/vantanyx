@@ -35,9 +35,18 @@ function cleanRule(r) {
   if (typeof r.group === 'string') out.group = r.group.slice(0, 40);
   if (typeof r.active === 'boolean') out.active = r.active;
   if (typeof r.since === 'string' && DAY_KEY.test(r.since)) out.since = r.since;
+  // count : objectif chiffré d'une règle à cocher (pompes, gainage…)
+  if (r.type === 'check' && r.count && typeof r.count === 'object' && isNum(r.count.goal) && r.count.goal > 0 && r.count.goal <= 100000 && typeof r.count.unit === 'string' && r.count.unit) {
+    out.count = { goal: r.count.goal, unit: r.count.unit.slice(0, 8) };
+  }
   if (r.type === 'gauge') {
     if (!isNum(r.goal) || r.goal <= 0 || r.goal > 100000) return null;
     out.goal = r.goal;
+    // jauge chiffrée (pompes) : unité, boutons rapides, plafond, date de conversion
+    if (typeof r.unit === 'string' && r.unit) out.unit = r.unit.slice(0, 8);
+    if (Array.isArray(r.steps) && r.steps.length >= 1 && r.steps.length <= 3 && r.steps.every((x) => isNum(x) && x > 0 && x <= 100000)) out.steps = r.steps;
+    if (isNum(r.max) && r.max >= r.goal && r.max <= 100000) out.max = r.max;
+    if (typeof r.gaugeFrom === 'string' && DAY_KEY.test(r.gaugeFrom)) out.gaugeFrom = r.gaugeFrom;
   }
   if (r.type === 'pair') {
     if (!Array.isArray(r.labels) || r.labels.length !== 2 || !r.labels.every((l) => typeof l === 'string')) return null;
@@ -57,6 +66,12 @@ function cleanDay(d) {
   const out = { v, pct: Math.round(d.pct), ex: d.ex === true };
   // act : règles actives ce jour-là (sert aux stats par règle).
   if (Array.isArray(d.act)) out.act = d.act.filter((x) => typeof x === 'string' && x.length <= 40).slice(0, 100);
+  // n : vrais chiffres du jour (pompes, gainage…)
+  if (d.n && typeof d.n === 'object' && !Array.isArray(d.n)) {
+    const n = {};
+    for (const [k, val] of Object.entries(d.n)) if (k.length <= 40 && isNum(val) && val >= 0 && val <= 100000) n[k] = val;
+    if (Object.keys(n).length) out.n = n;
+  }
   return out;
 }
 

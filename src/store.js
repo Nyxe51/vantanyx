@@ -159,7 +159,7 @@ export const actions = {
     const rule = state.rules.find((r) => r.id === id);
     if (!rule) return;
     const [key, day] = todayDay();
-    day.v[id] = Math.max(0, Math.min((day.v[id] || 0) + delta, rule.goal * 1.5));
+    day.v[id] = Math.max(0, Math.min((day.v[id] || 0) + delta, rule.max ?? rule.goal * 1.5));
     refreshPct(day);
     commit({ day: key });
   },
@@ -227,6 +227,25 @@ export const actions = {
     return { ok: true };
   },
 
+  // Vrai chiffre du jour (pompes, gainage…). n = null efface le chiffre. Un chiffre ≥ objectif valide la règle, sinon non.
+  setCount(id, n) {
+    const rule = state.rules.find((r) => r.id === id);
+    if (!rule || !rule.count) return { error: 'Cette règle n’a pas de chiffre.' };
+    const [key, day] = todayDay();
+    day.n = day.n || {};
+    if (n === null) {
+      delete day.n[id];
+      if (!Object.keys(day.n).length) delete day.n;
+    } else {
+      day.n[id] = n;
+      day.v[id] = n >= rule.count.goal ? 1 : 0;
+      transient.pop = n >= rule.count.goal ? id : '';
+    }
+    refreshPct(day);
+    commit({ day: key });
+    return { ok: true, validated: n !== null && n >= rule.count.goal };
+  },
+
   // Journée exceptionnelle (malade, voyage, jour off) : aujourd'hui est mis de côté, ou remis.
   setExceptional(value) {
     const [key, day] = todayDay();
@@ -255,12 +274,44 @@ export const actions = {
     return { ok: true };
   },
 
-  // Une seule fois : la règle « 1 minute de planche » devient « 1 minute de gainage » (la figure Planche du Sport ne bouge pas).
-  migrateNames() {
-    const r = state.rules.find((x) => x.id === 'planche');
-    if (!r || r.name !== '1 minute de planche') return;
-    state.rules = state.rules.map((x) => (x === r ? { ...x, name: '1 minute de gainage' } : x));
-    commit({ main: true });
+  // Mises à niveau des règles déjà enregistrées (sans effet si déjà faites) :
+  //  - « 1 minute de planche » devient « 1 minute de gainage » (la figure Planche du Sport ne bouge pas) ;
+  //  - le gainage reçoit son objectif chiffré (60 s) ;
+  //  - les pompes deviennent une jauge cumulée en répétitions (objectif 20) : les jours passés ne sont pas réécrits
+  //    (gaugeFrom dit à partir de quand la règle est une jauge), seul aujourd'hui est converti.
+  migrateRules() {
+    let changed = false;
+    let dayKey = null;
+    state.rules = state.rules.map((x) => {
+      let r = x;
+      if (r.id === 'planche' && r.name === '1 minute de planche') r = { ...r, name: '1 minute de gainage' };
+      if (r.id === 'planche' && r.type === 'check' && !r.count) r = { ...r, count: { goal: 60, unit: 's' } };
+      if (r.id === 'pompes' && r.type === 'check') {
+        const { count, sub, ...rest } = r;
+        r = { ...rest, type: 'gauge', goal: 20, unit: 'rép.', steps: [5, 10], max: 500, gaugeFrom: todayKey() };
+        const day = state.days[todayKey()];
+        if (day) {
+          const n = day.n && day.n.pompes;
+          const v = day.v && day.v.pompes;
+          day.v = day.v || {};
+          day.v.pompes = typeof n === 'number' ? n : v === 1 ? 20 : 0;
+          if (day.n) {
+            delete day.n.pompes;
+            if (!Object.keys(day.n).length) delete day.n;
+          }
+          dayKey = todayKey();
+        }
+      }
+      if (r !== x) changed = true;
+      return r;
+    });
+    if (!changed) return;
+    const what = { main: true };
+    if (dayKey) {
+      refreshPct(state.days[dayKey]);
+      what.day = dayKey;
+    }
+    commit(what);
   },
 
   clearBackground() {
