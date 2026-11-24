@@ -1,5 +1,5 @@
 import { todayKey } from './dates.js';
-import { dayPercent, rulesDone } from './rules.js';
+import { dayPercent, rulesDone, activeRules } from './rules.js';
 import { levelProgress, xpAt } from './xp.js';
 import { rankIndexForLevel } from './ranks.js';
 import { totalXp, monthPercent } from './stats.js';
@@ -24,7 +24,7 @@ export function derive(state, ranks) {
     values: day.v,
     pct,
     done: rulesDone(state.rules, day.v),
-    total: state.rules.length,
+    total: activeRules(state.rules).length,
     xp,
     level: lp.level,
     levelRatio: lp.ratio,

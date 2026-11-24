@@ -5,5 +5,5 @@
   { "id": "skincare", "name": "Skincare",             "group": "Les soins",              "type": "pair",  "labels": ["Matin", "Soir"] },
   { "id": "douche",   "name": "Douche le soir",       "sub": "À la fin de la journée",  "group": "Les soins",     "type": "check" },
   { "id": "pompes",   "name": "20 pompes minimum",    "sub": "Note ton vrai chiffre",   "group": "Le corps",      "type": "check" },
-  { "id": "planche",  "name": "1 minute de planche",  "sub": "Note ton vrai chiffre",   "group": "Le corps",      "type": "check" }
+  { "id": "planche",  "name": "1 minute de gainage",  "sub": "Note ton vrai chiffre",   "group": "Le corps",      "type": "check" }
 ]

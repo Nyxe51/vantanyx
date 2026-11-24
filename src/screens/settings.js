@@ -1,6 +1,7 @@
 import { esc } from '../ui/html.js';
 import { isTest, appEnv } from '../env.js';
 import { APP_VERSION } from '../version.js';
+import { activeRules } from '../logic/rules.js';
 import { syncMessage } from '../syncstatus.js';
 
 const ENV_LABEL = { test: 'test', prod: 'vraie appli', local: 'local' };
@@ -29,6 +30,10 @@ export function renderSettings(state, sync) {
           : '<div class="glass card"><b>Mode local</b><div class="mu">Tes données restent sur cet appareil, sans compte.</div></div>'
       }
       ${syncCard}
+      <div class="glass card row link" data-act="sub" data-arg="regles">
+        <div><b>Règles</b><div class="mu">${activeRules(state.rules).length} active${activeRules(state.rules).length > 1 ? 's' : ''} sur ${state.rules.length}</div></div>
+        <span class="mu">›</span>
+      </div>
       <div class="glass card row link" data-act="sub" data-arg="fond">
         <div><b>Fond de l’accueil</b><div class="mu">${state.ui.bg ? 'Photo personnalisée' : 'Image par défaut'}</div></div>
         <span class="mu">›</span>

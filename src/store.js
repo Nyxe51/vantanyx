@@ -2,7 +2,8 @@
 //  - Mode local (sans compte) : tout est rangé dans le navigateur de l'appareil.
 //  - Mode compte (Firebase)   : les données viennent de Firestore ; chaque changement y est renvoyé (voir sync.js).
 import defaultRules from './data/default-rules.json';
-import { dayPercent } from './logic/rules.js';
+import { dayPercent, activeRules } from './logic/rules.js';
+import { addRule as addRuleTo, updateRule, setActive } from './logic/ruleedit.js';
 import { todayKey } from './logic/dates.js';
 import { isTest } from './env.js';
 import { SCHEMA_VERSION } from './schema.js';
@@ -121,9 +122,21 @@ function todayDay() {
 }
 
 // Le % du jour est enregistré à chaque changement : l'historique ne bouge plus si les règles changent plus tard.
+// On enregistre aussi la liste des règles actives ce jour-là (act) : les stats par règle en ont besoin.
 const refreshPct = (day) => {
   day.pct = dayPercent(state.rules, day.v);
+  day.act = activeRules(state.rules).map((r) => r.id);
 };
+
+// Après un changement de la liste de règles : le % d'aujourd'hui est recalculé (les jours passés ne bougent jamais).
+function rulesChanged() {
+  const key = todayKey();
+  if (state.days[key]) {
+    refreshPct(state.days[key]);
+    return { main: true, day: key };
+  }
+  return { main: true };
+}
 
 export const actions = {
   // Règle « à cocher » (j = null) ou case d'une paire (j = 0 matin, 1 soir).
@@ -188,6 +201,38 @@ export const actions = {
     const jobs = [backend.pushMain(mainPayload()), backend.pushBg(state.ui.bg), ...Object.keys(state.days).map((k) => backend.pushDay(k, state.days[k]))];
     notify();
     return Promise.all(jobs).then((r) => r.every(Boolean));
+  },
+
+  addRule(input) {
+    const r = addRuleTo(state.rules, input, todayKey());
+    if (r.error) return r;
+    state.rules = r.rules;
+    commit(rulesChanged());
+    return { ok: true };
+  },
+
+  editRule(id, input) {
+    const r = updateRule(state.rules, id, input);
+    if (r.error) return r;
+    state.rules = r.rules;
+    commit(rulesChanged());
+    return { ok: true };
+  },
+
+  toggleRule(id, active) {
+    const r = setActive(state.rules, id, active);
+    if (r.error) return r;
+    state.rules = r.rules;
+    commit(rulesChanged());
+    return { ok: true };
+  },
+
+  // Une seule fois : la règle « 1 minute de planche » devient « 1 minute de gainage » (la figure Planche du Sport ne bouge pas).
+  migrateNames() {
+    const r = state.rules.find((x) => x.id === 'planche');
+    if (!r || r.name !== '1 minute de planche') return;
+    state.rules = state.rules.map((x) => (x === r ? { ...x, name: '1 minute de gainage' } : x));
+    commit({ main: true });
   },
 
   clearBackground() {

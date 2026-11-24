@@ -1,6 +1,6 @@
 import { esc } from '../ui/html.js';
 import { icons, star } from '../ui/icons.js';
-import { ruleProgress } from '../logic/rules.js';
+import { ruleProgress, isActive } from '../logic/rules.js';
 import quotes from '../data/quotes.json';
 import { badgeUrl } from '../ui/badges.js';
 import { isTest } from '../env.js';
@@ -48,6 +48,7 @@ function renderRule(rule, value, pop) {
 function renderRules(state, d, pop) {
   let lastGroup = '';
   return state.rules
+    .filter(isActive)
     .map((rule) => {
       const header = rule.group && rule.group !== lastGroup ? `<div class="gh">${esc(rule.group)}</div>` : '';
       lastGroup = rule.group || lastGroup;

@@ -15,13 +15,18 @@ export function ruleProgress(rule, value) {
   }
 }
 
+export const isActive = (r) => r.active !== false;
+export const activeRules = (rules) => rules.filter(isActive);
+
 export const isDone = (rule, value) => ruleProgress(rule, value) === 1;
 
 // % du jour = moyenne d'avancement de toutes les règles (0 à 100).
-export function dayPercent(rules, values) {
+// Seules les règles actives comptent.
+export function dayPercent(allRules, values) {
+  const rules = activeRules(allRules);
   if (!rules.length) return 0;
   const sum = rules.reduce((a, r) => a + ruleProgress(r, values[r.id]), 0);
   return Math.round((sum / rules.length) * 100);
 }
 
-export const rulesDone = (rules, values) => rules.filter((r) => isDone(r, values[r.id])).length;
+export const rulesDone = (rules, values) => activeRules(rules).filter((r) => isDone(r, values[r.id])).length;

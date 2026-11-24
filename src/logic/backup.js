@@ -33,6 +33,8 @@ function cleanRule(r) {
   const out = { id: r.id, name: r.name.trim(), type: r.type };
   if (typeof r.sub === 'string') out.sub = r.sub.slice(0, 80);
   if (typeof r.group === 'string') out.group = r.group.slice(0, 40);
+  if (typeof r.active === 'boolean') out.active = r.active;
+  if (typeof r.since === 'string' && DAY_KEY.test(r.since)) out.since = r.since;
   if (r.type === 'gauge') {
     if (!isNum(r.goal) || r.goal <= 0 || r.goal > 100000) return null;
     out.goal = r.goal;
@@ -52,7 +54,10 @@ function cleanDay(d) {
     if (isNum(val)) v[k] = val;
     else if (Array.isArray(val) && val.length === 2 && val.every(isNum)) v[k] = val;
   }
-  return { v, pct: Math.round(d.pct), ex: d.ex === true };
+  const out = { v, pct: Math.round(d.pct), ex: d.ex === true };
+  // act : règles actives ce jour-là (sert aux stats par règle).
+  if (Array.isArray(d.act)) out.act = d.act.filter((x) => typeof x === 'string' && x.length <= 40).slice(0, 100);
+  return out;
 }
 
 // Renvoie { ok: true, data, dayCount, ruleCount } ou { ok: false, error: 'message en français' }.

@@ -5,6 +5,7 @@ import './styles/shell.css';
 import './styles/home.css';
 import './styles/ranks.css';
 import './styles/gate.css';
+import './styles/rules.css';
 
 import { getState, subscribe, actions, transient, startRemote, stopRemote } from './store.js';
 import { firebaseEnabled, db, projectId } from './firebase.js';
@@ -25,6 +26,8 @@ import { saveJsonFile } from './logic/download.js';
 import { renderHome } from './screens/home.js';
 import { renderSoon, renderSubScreen } from './screens/soon.js';
 import { renderSettings } from './screens/settings.js';
+import { renderRulesEditor, renderRuleForm, setEditing, getEditing } from './screens/rules.js';
+import { isActive } from './logic/rules.js';
 import { renderRanks, renderColors } from './screens/ranks.js';
 import { renderBackground, initDraft, resetDraft, chooseFile, saveDraft, resetFit, removeBackground, bindBackgroundEditor } from './screens/background.js';
 import { DEFAULT_FIT } from './logic/bgfit.js';
@@ -49,6 +52,8 @@ function subHtml(name, state, d) {
   if (name === 'rangs') return renderRanks(state, d);
   if (name === 'couleurs') return renderColors(state, d);
   if (name === 'fond') return renderBackground();
+  if (name === 'regles') return renderRulesEditor(state);
+  if (name === 'regle') return renderRuleForm(state);
   return renderSubScreen(name);
 }
 
@@ -83,7 +88,9 @@ function render() {
   main.innerHTML = route.tab === 'accueil' ? renderHome(state, d, view, getSyncStatus()) : renderSoon(route.tab);
 
   renderNav(route.tab);
-  setSub(route.sub ? subHtml(route.sub, state, d) : null);
+  // Le formulaire d'une règle n'est pas réaffiché pendant la saisie (une synchro ne doit pas effacer ce qu'on tape).
+  const typing = route.sub === 'regle' && document.getElementById('rf-name');
+  if (!typing) setSub(route.sub ? subHtml(route.sub, state, d) : null);
   shownDay = d.today;
 }
 
@@ -153,6 +160,35 @@ document.addEventListener('click', (e) => {
     case 'reload':
       location.reload();
       break;
+    case 'rule-toggle': {
+      const r = getState().rules.find((x) => x.id === rule);
+      if (!r) break;
+      const res = actions.toggleRule(rule, !isActive(r));
+      if (res.error) showToast(res.error);
+      break;
+    }
+    case 'rule-edit':
+      setEditing(rule);
+      openSub('regle');
+      break;
+    case 'rule-new':
+      setEditing(null);
+      openSub('regle');
+      break;
+    case 'rule-save': {
+      const name = document.getElementById('rf-name').value;
+      const typeEl = document.querySelector('input[name="rf-type"]:checked');
+      const sel = document.getElementById('rf-group');
+      const group = document.getElementById('rf-newgroup').value.trim() || (sel ? sel.value : '');
+      const id = getEditing();
+      const res = id ? actions.editRule(id, { name, group }) : actions.addRule({ name, type: typeEl ? typeEl.value : 'check', group });
+      if (res.error) showToast(res.error);
+      else {
+        closeSub();
+        showToast('Règle enregistrée.');
+      }
+      break;
+    }
     case 'bg-save':
       if (saveDraft()) closeSub();
       break;
@@ -243,6 +279,7 @@ function startSession(user) {
     pseudo: () => takePendingPseudo() || user.displayName || (user.email || '').split('@')[0] || 'Nyxe',
     onReady() {
       ready = true;
+      actions.migrateNames();
       gate.view = null;
       renderGate();
       render();
@@ -320,4 +357,5 @@ setInterval(() => {
   if (d.today !== shownDay) render();
 }, 60000);
 
+if (!firebaseEnabled) actions.migrateNames();
 render();
