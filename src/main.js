@@ -178,14 +178,28 @@ document.addEventListener('click', (e) => {
     case 'rule-save': {
       const name = document.getElementById('rf-name').value;
       const typeEl = document.querySelector('input[name="rf-type"]:checked');
-      const sel = document.getElementById('rf-group');
-      const group = document.getElementById('rf-newgroup').value.trim() || (sel ? sel.value : '');
+      const gEl = document.querySelector('input[name="rf-group"]:checked');
+      const group = document.getElementById('rf-newgroup').value.trim() || (gEl ? gEl.value : '');
       const id = getEditing();
       const res = id ? actions.editRule(id, { name, group }) : actions.addRule({ name, type: typeEl ? typeEl.value : 'check', group });
       if (res.error) showToast(res.error);
       else {
         closeSub();
         showToast('Règle enregistrée.');
+      }
+      break;
+    }
+    case 'rule-delete': {
+      const id = getEditing();
+      const r = getState().rules.find((x) => x.id === id);
+      if (!r) break;
+      if (!window.confirm(`Supprimer « ${r.name} » ?\n\nElle disparaît de la liste et de ses jours passés. Tes % passés ne changent pas. Impossible à annuler.`)) break;
+      const res = actions.deleteRule(id);
+      if (res.error) showToast(res.error);
+      else {
+        setEditing(null);
+        closeSub();
+        showToast('Règle supprimée.');
       }
       break;
     }

@@ -70,6 +70,16 @@ export function updateRule(rules, id, { name, group }) {
   return { rules: insertInGroup(rules.filter((r) => r.id !== id), next) };
 }
 
+// Supprime une règle CRÉÉE par l'utilisateur (celles de la base se désactivent seulement : elles n'ont pas de date de création).
+export function removeRule(rules, id) {
+  const old = rules.find((r) => r.id === id);
+  if (!old) return { error: 'Règle introuvable.' };
+  if (!old.since) return { error: 'Cette règle fait partie de la base : désactive-la plutôt.' };
+  const left = rules.filter((r) => r.id !== id);
+  if (!left.some(isActive)) return { error: 'Garde au moins une règle active.' };
+  return { rules: left };
+}
+
 // Active ou désactive. On garde toujours au moins une règle active.
 export function setActive(rules, id, active) {
   const old = rules.find((r) => r.id === id);

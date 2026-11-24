@@ -3,7 +3,7 @@
 //  - Mode compte (Firebase)   : les données viennent de Firestore ; chaque changement y est renvoyé (voir sync.js).
 import defaultRules from './data/default-rules.json';
 import { dayPercent, activeRules } from './logic/rules.js';
-import { addRule as addRuleTo, updateRule, setActive } from './logic/ruleedit.js';
+import { addRule as addRuleTo, updateRule, setActive, removeRule } from './logic/ruleedit.js';
 import { todayKey } from './logic/dates.js';
 import { isTest } from './env.js';
 import { SCHEMA_VERSION } from './schema.js';
@@ -224,6 +224,26 @@ export const actions = {
     if (r.error) return r;
     state.rules = r.rules;
     commit(rulesChanged());
+    return { ok: true };
+  },
+
+  // Supprime une règle créée : elle disparaît de la liste et de ses jours passés (les % passés ne changent pas).
+  deleteRule(id) {
+    const r = removeRule(state.rules, id);
+    if (r.error) return r;
+    state.rules = r.rules;
+    const touched = [];
+    for (const [k, d] of Object.entries(state.days)) {
+      const hasV = d.v && id in d.v;
+      const hasAct = Array.isArray(d.act) && d.act.includes(id);
+      if (!hasV && !hasAct) continue;
+      if (hasV) delete d.v[id];
+      if (hasAct) d.act = d.act.filter((x) => x !== id);
+      touched.push(k);
+    }
+    const what = rulesChanged();
+    what.days = touched.filter((k) => k !== what.day);
+    commit(what);
     return { ok: true };
   },
 

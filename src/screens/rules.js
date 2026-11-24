@@ -38,7 +38,8 @@ export function renderRuleForm(state) {
   const rule = editing ? state.rules.find((r) => r.id === editing) : null;
   const cats = categories(state.rules);
   const cur = rule ? rule.group || '' : cats[0] || '';
-  const opts = [...cats.map((c) => `<option value="${esc(c)}"${c === cur ? ' selected' : ''}>${esc(c)}</option>`), `<option value=""${cur === '' ? ' selected' : ''}>Sans catégorie</option>`].join('');
+  const chip = (value, label) => `<label class="cat"><input type="radio" name="rf-group" value="${esc(value)}"${value === cur ? ' checked' : ''}><span>${esc(label)}</span></label>`;
+  const chips = [...cats.map((c) => chip(c, c)), chip('', 'Sans catégorie')].join('');
   return `<div class="top"><button class="back" data-act="back">‹ Retour</button></div>
     <div class="pad">
       <h2 style="margin-bottom:12px">${rule ? 'Modifier la règle' : 'Nouvelle règle'}</h2>
@@ -51,9 +52,10 @@ export function renderRuleForm(state) {
         <label class="opt"><input type="radio" name="rf-type" value="check" checked><span><b>Case à cocher</b><small>Faite ou pas faite (appui long de 2 s).</small></span></label>
         <label class="opt"><input type="radio" name="rf-type" value="pair"><span><b>Matin et soir</b><small>Deux passages, comptés 50 % chacun.</small></span></label>`
       }
-      <label class="lbl" for="rf-group">Catégorie</label>
-      <select class="in" id="rf-group">${opts}</select>
+      <span class="lbl">Catégorie</span>
+      <div class="cats">${chips}</div>
       <input class="in" id="rf-newgroup" maxlength="${GROUP_MAX}" placeholder="Ou crée une nouvelle catégorie" autocomplete="off">
       <button class="cta" style="margin-top:8px" data-act="rule-save">Enregistrer</button>
+      ${rule && rule.since ? '<button class="btn ghost danger" style="width:100%;padding:12px" data-act="rule-delete">Supprimer cette règle</button>' : ''}
     </div>`;
 }
