@@ -74,7 +74,7 @@ export function renderHome(state, d, view, sync) {
       <div class="av"><span class="u chr">${initial}</span></div>
       <div style="flex:1">
         <div class="row"><b class="u" style="font-size:15px">${esc(state.profile.pseudo)}</b><span class="rkrow"><img class="rkbadge" src="${badgeUrl(d.rank.id)}" alt=""><span class="rk">${esc(d.rank.name)}</span></span></div>
-        <div class="row mu num" style="margin:3px 0 7px"><span>Niveau ${d.level}</span><span>+${d.pct} XP aujourd’hui</span></div>
+        <div class="row mu num" style="margin:3px 0 7px"><span>Niveau ${d.level}</span><span>+${d.xpToday} XP aujourd’hui</span></div>
         <div class="bar"><i style="width:${Math.round(d.levelRatio * 100)}%"></i></div>
       </div>
     </div>
@@ -84,6 +84,11 @@ export function renderHome(state, d, view, sync) {
         const m = state.account && sync ? syncMessage(sync) : null;
         return m ? `<div class="syncbar ${m.level}" role="status">${esc(m.text)}</div>` : '';
       })()}
+      ${
+        d.ex
+          ? '<div class="glass card row exbar"><div><b>Journée mise de côté</b><div class="mu">Hors du % du mois, ni gain ni perte d’XP.</div></div><button class="btn" data-act="ex-off">Remettre</button></div>'
+          : ''
+      }
       <div class="glass card ringcard">
         <svg viewBox="0 0 100 100" width="108" height="108" style="flex:none" aria-hidden="true">
           <defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:#fff"/><stop offset="1" style="stop-color:hsl(var(--h) var(--s) 62%)"/></linearGradient></defs>
@@ -93,7 +98,7 @@ export function renderHome(state, d, view, sync) {
         </svg>
         <div>
           <b class="u chr" style="font-size:18px">Aujourd’hui</b>
-          <div class="mu num" style="margin-top:4px">+${d.pct} XP · ${left} règle${left > 1 ? 's' : ''} restante${left > 1 ? 's' : ''}</div>
+          <div class="mu num" style="margin-top:4px">+${d.xpToday} XP · ${left} règle${left > 1 ? 's' : ''} restante${left > 1 ? 's' : ''}</div>
         </div>
       </div>
 
@@ -106,5 +111,6 @@ export function renderHome(state, d, view, sync) {
       <div class="row" style="margin:0 4px 6px"><h3 style="margin:0">Règles du jour</h3><b class="u num" style="color:var(--ac)">${d.pct} %</b></div>
       <div class="hint">Maintiens une règle 2 secondes pour la valider.</div>
       ${renderRules(state, d, view.pop)}
+      ${d.ex ? '' : '<button class="btn ghost exbtn" data-act="ex-on">Journée exceptionnelle (malade, voyage, jour off)</button>'}
     </div>`;
 }

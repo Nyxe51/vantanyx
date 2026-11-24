@@ -9,7 +9,9 @@ export function derive(state, ranks) {
   const today = todayKey();
   const day = state.days[today] || { v: {}, ex: false };
   const pct = dayPercent(state.rules, day.v);
-  const xp = totalXp(state.days, today) + (day.ex ? 0 : pct);
+  const ex = !!day.ex; // journée mise de côté : hors du % du mois, ne rapporte ni ne coûte d'XP
+  const xpToday = ex ? 0 : pct;
+  const xp = totalXp(state.days, today) + xpToday;
   let lp = levelProgress(xp);
   // Mode test (temporaire) : force un niveau pour voir les rangs et les couleurs sans attendre des mois.
   const forced = state.dev && state.dev.level;
@@ -23,6 +25,8 @@ export function derive(state, ranks) {
     today,
     values: day.v,
     pct,
+    ex,
+    xpToday,
     done: rulesDone(state.rules, day.v),
     total: activeRules(state.rules).length,
     xp,

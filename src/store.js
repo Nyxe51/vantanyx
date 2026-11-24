@@ -227,6 +227,14 @@ export const actions = {
     return { ok: true };
   },
 
+  // Journée exceptionnelle (malade, voyage, jour off) : aujourd'hui est mis de côté, ou remis.
+  setExceptional(value) {
+    const [key, day] = todayDay();
+    day.ex = !!value;
+    refreshPct(day);
+    commit({ day: key });
+  },
+
   // Supprime une règle créée : elle disparaît de la liste et de ses jours passés (les % passés ne changent pas).
   deleteRule(id) {
     const r = removeRule(state.rules, id);

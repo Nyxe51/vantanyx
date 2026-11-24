@@ -203,6 +203,12 @@ document.addEventListener('click', (e) => {
       }
       break;
     }
+    case 'ex-on':
+      if (window.confirm('Mettre cette journée de côté ?\n\nElle sera hors du % du mois et ne rapportera aucun XP. Tu pourras la remettre quand tu veux.')) actions.setExceptional(true);
+      break;
+    case 'ex-off':
+      actions.setExceptional(false);
+      break;
     case 'bg-save':
       if (saveDraft()) closeSub();
       break;

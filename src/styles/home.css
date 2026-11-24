@@ -343,3 +343,16 @@
   margin-bottom: 8px;
   font-size: 10px;
 }
+
+/* Journée exceptionnelle */
+.exbar {
+  border-color: rgba(255, 210, 122, 0.45);
+}
+
+.exbtn {
+  display: block;
+  width: 100%;
+  margin: 14px 0 6px;
+  padding: 12px;
+  color: var(--mu);
+}
